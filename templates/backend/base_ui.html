@@ -451,8 +451,7 @@
             </li>
             <li>
               <a href="{% url 'suketusaha' %}">
-                <i class="bi bi-circle"></i
-                ><span>Suket. Usaha</span>
+                <i class="bi bi-circle"></i><span>Suket. Usaha</span>
               </a>
             </li>
             <li>
@@ -491,9 +490,9 @@
         <!-- End Profile Page Nav -->
 
         <li class="nav-item">
-          <a class="nav-link collapsed" href="pages-faq.html">
-            <i class="bi bi-question-circle"></i>
-            <span>F.A.Q</span>
+          <a class="nav-link collapsed" href=" {% url 'pengumuman' %} ">
+            <i class="bi bi-receipt-cutoff"></i>
+            <span>Pengumuman</span>
           </a>
         </li>
         <!-- End F.A.Q Page Nav -->
@@ -583,5 +582,9 @@
 
     <!-- Template Main JS File -->
     <script src="{% static 'backend/js/main.js'%}"></script>
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+      CKEDITOR.replace('inputKonten');
+    </script>
   </body>
 </html>

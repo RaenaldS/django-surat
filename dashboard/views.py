@@ -1238,7 +1238,7 @@ def edit_suketpindahnikah(request, id):
         suket_id.jenis_kelamin1 = jenis_kelamin1
         suket_id.agama1 = agama1
         suket_id.pekerjaan1 = pekerjaan1
-        suket_id.alamat1 = alamat1
+        suket_id.alamat1 = alamat1  
         suket_id.nama2 = nama2
         suket_id.ttl2 = ttl2
         suket_id.jenis_kelamin2 = jenis_kelamin2
@@ -1327,3 +1327,75 @@ def edit_suketrekkeltani(request, id):
 def delete_suketrekkeltani(request, id):
     SuketRekKelTani.objects.get(id=id).delete()
     return redirect('suketrekkeltani')
+
+def pengumuman(request):
+    template_name = "backend/pengumuman.html"
+    
+    annc = Pengumuman.objects.all()
+    
+    if request.method == 'POST':
+        judul = request.POST.get("inputJudul")
+        konten = request.POST.get("inputKonten")
+        picture = request.FILES.get("inputGambar")
+        
+        
+        fs = FileSystemStorage()
+
+        # Jika ada file pengantar RT yang di-upload
+        if picture:
+            filename_pengantar = fs.save(picture.name, picture)
+            url_pengantar = fs.url(filename_pengantar)
+        else:
+            url_pengantar = None
+            
+        Pengumuman.objects.create(
+            penulis = request.user,
+            judul=judul,
+            konten=konten,
+            picture=url_pengantar
+        )
+        
+        return redirect('pengumuman')
+        
+    context = {
+        "annc" : annc
+    }
+    
+    return render(request, template_name, context)
+
+def edit_pengumuman(request, id):
+    template_name = "backend/pengumuman.html"
+    
+    pengumuman_id = Pengumuman.objects.get(id=id)
+    
+    if request.method == "POST":
+        # Mengambil input data dari form
+        judul = request.POST.get("inputJudul")
+        konten = request.POST.get("inputKonten")
+        picture = request.FILES.get("inputGambar")
+        
+        fs = FileSystemStorage()
+
+        # Jika ada file gambar baru yang di-upload
+        if picture:
+            filename_pengantar = fs.save(picture.name, picture)
+            pengumuman_id.picture = fs.url(filename_pengantar)
+        
+        # Update data di objek pengumuman
+        pengumuman_id.judul = judul
+        pengumuman_id.konten = konten
+        pengumuman_id.date = timezone.now()
+
+        pengumuman_id.save()
+        
+        return redirect('pengumuman')  # Redirect ke halaman pengumuman (sesuaikan dengan rute yang kamu inginkan)
+    
+    context = {
+        "value": pengumuman_id
+    }
+    
+    return render(request, template_name, context)
+
+def delete_pengumuman(request, id):
+    Pengumuman.objects.get(id=id).delete()
+    return redirect('pengumuman')  # Redirect ke halaman pengumuman (sesuaikan dengan rute yang kamu inginkan)

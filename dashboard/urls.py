@@ -48,6 +48,9 @@ urlpatterns = [
     path("suket-rekomendasi-kelompok-tani/",suketrekkeltani,  name="suketrekkeltani"),
     path("suket-rekomendasi-kelompok-tani/edit/<int:id>",edit_suketrekkeltani,  name="edit_suketrekkeltani"),
     path("suket-rekomendasi-kelompok-tani/delete/<int:id>",delete_suketrekkeltani,  name="delete_suketrekkeltani"),
+    path("tambah-pengumuman/", pengumuman, name="pengumuman"),
+    path("tambah-pengumuman/edit/<int:id>", edit_pengumuman, name="edit_pengumuman"),
+    path("tambah-pengumuman/delete/<int:id>", delete_pengumuman, name="delete_pengumuman")
    
 ]
 

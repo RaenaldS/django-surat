@@ -178,3 +178,8 @@ admin.site.register(SuketPindahNikah, AdSuketPindahNikah)
 class AdSuketRekKelTani(admin.ModelAdmin):
     list_display = ["penulis", "nama", "jabatan", "sekretariat", "tempat", "bantuan", "tujuan", "date", "status"]
 admin.site.register(SuketRekKelTani, AdSuketRekKelTani)
+
+class Adpengumuman(admin.ModelAdmin):
+    list_display = ["penulis", "judul", "konten", "date", "picture"]
+    
+admin.site.register(Pengumuman, Adpengumuman)

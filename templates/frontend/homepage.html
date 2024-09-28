@@ -17,15 +17,21 @@
   </head>
 
   <body>
-    <header class="jumbtron">
-      <nav class="navbar navbar-expand-lg container">
-        <div class="container-fluid">
-          <img
-            class="logo-kecil"
-            src="{% static 'frontend/gambar/logokukar.png' %}"
-            alt="logo-kukar"
-          />
-          <span class="text-light fw-bold ms-3 fs-4"> Kerta Buana </span>
+    <header class="jumbtron body-content" id="home">
+      <nav
+        class="navbar navbar-expand-lg container-fluid "
+        id="navbar"
+       
+      >
+        <div class="container-fluid ">
+          <div >
+            <img
+              class="logo-kecil"
+              src="{% static 'frontend/gambar/logokukar.png' %}"
+              alt="logo-kukar"
+            />
+            <span class="text-light fw-bold ms-3 fs-4"> Kerta Buana </span>
+          </div>
           <button
             class="navbar-toggler bg-light"
             type="button"
@@ -43,27 +49,35 @@
           >
             <ul class="navbar-nav ms-lg-auto ms-3 ms-md-3">
               <li class="nav-item me-md-3">
-                <a class="nav-link active text-light fs-6 fw-bold" href="#"
+                <a class="nav-link active text-light fs-6 fw-bold" href="#home"
                   >Home</a
                 >
               </li>
               <li class="nav-item me-md-3">
-                <a class="nav-link active text-light fs-6 fw-bold" href="#"
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
+                  href="#pengumuman"
                   >Pengumuman</a
                 >
               </li>
               <li class="nav-item me-md-3">
-                <a class="nav-link active text-light fs-6 fw-bold" href="#"
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
+                  href="#profile"
                   >Profile</a
                 >
               </li>
               <li class="nav-item me-md-3">
-                <a class="nav-link active text-light fs-6 fw-bold" href="#"
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
+                  href="#kontak"
                   >Kontak</a
                 >
               </li>
               <li class="nav-item">
-                <a class="nav-link active text-light fs-6 fw-bold" href="{% url 'dashboard' %}"
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
+                  href="{% url 'dashboard' %}"
                   >Login</a
                 >
               </li>
@@ -449,7 +463,7 @@
       </section>
       <section
         class="container mx-auto mt-lg-5 mt-md-5 p-5 rounded shadow-black white-box"
-        id="pengumuman"
+        id="profile"
       >
         <h1 class="text-center fw-bold mb-4 py-3 fs-2">SAMBUTAN KEPALA DESA</h1>
         <div
@@ -476,7 +490,7 @@
       </section>
       <section
         class="container mx-auto mt-lg-5 mt-md-5 p-5 rounded shadow-black white-box"
-        id="pengumuman"
+        id=""
       >
         <h1 class="text-center fw-bold mb-4 fs-2">SERBA-SERBI DESA</h1>
         <div
@@ -800,5 +814,16 @@
     </footer>
 
     <script src="{% static 'frontend/js/bootstrap.min.js' %}"></script>
+    <script>
+      window.addEventListener("scroll", function () {
+        var navbar = document.getElementById("navbar");
+        if (window.scrollY > 50) {
+          // Scroll threshold, 50px misalnya
+          navbar.classList.add("scrolled");
+        } else {
+          navbar.classList.remove("scrolled");
+        }
+      });
+    </script>
   </body>
 </html>
