@@ -21,7 +21,9 @@ def replace_headings(value):
 
 @register.simple_tag
 def get_surat_table_url(surat):
-    if isinstance(surat, SuketBelumMenikah):
+    if isinstance(surat, SuketPermohonanKTP):
+        return reverse('suketpermohonanktp')
+    elif isinstance(surat, SuketBelumMenikah):
         return reverse('suketbelummenikah')
     elif isinstance(surat, SuketTidakMampu):
         return reverse('sukettidakmampu')

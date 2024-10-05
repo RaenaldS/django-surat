@@ -37,7 +37,11 @@
                   </td>
 
                   <td>{{ users.user.email }}</td>
-                  <td>sementara</td>
+                  {% if users.user.is_superuser %}
+                  <td class="text-warning fw-bold">Admin</td>
+                  {% else %}
+                  <td class="text-success fw-bold">Warga</td>
+                  {% endif %}
                   <td class="text-center">
                     <!-- Btn-group untuk aksi -->
                     <div
