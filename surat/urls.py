@@ -23,8 +23,13 @@ from .views import *
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", welcome, name="welcome"),
+    path("blog/", blog, name="blog-h"),
+    path("detail-pengumuman/detail/<int:id>", detail_pengumuman, name="detail_pengumuman"),
+    path("detail-blog/detail/<int:id>", detail_blog, name="detail_blog"),
+    path("login/", loginPage, name="loginpage"),
+ 
     # 
-    path("dashboard/", include('dashboard.urls'))
+    path("dashboard/", include('dashboard.urls')),
    
 ]
 

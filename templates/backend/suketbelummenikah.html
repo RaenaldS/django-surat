@@ -1,11 +1,12 @@
-{% extends "backend/base_ui.html" %} {% load static %} {% block konten %}
+{% extends "backend/base_ui.html" %} {% load static %} {% load custom_filters %}
+{% block konten %}
 
 <div>
   <div class="pagetitle">
     <h1>Surat Keterangan Belum Menikah</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
         <li class="breadcrumb-item active">Surat Keterangan Belum Menikah</li>
       </ol>
     </nav>
@@ -28,7 +29,6 @@
               name="inputNama"
               value="{{ value.nama }}"
               required
-              
             />
           </div>
         </div>
@@ -40,9 +40,9 @@
               {% if value.jenis_kelamin == "Laki-laki" %}
 
               <option value="Laki-laki" selected>Laki-laki</option>
-              <option value="Perempuan" >Perempuan</option>
+              <option value="Perempuan">Perempuan</option>
               {% else %}
-              <option value="Laki-laki" >Laki-laki</option>
+              <option value="Laki-laki">Laki-laki</option>
               <option value="Perempuan" selected>Perempuan</option>
               {% endif %}
             </select>
@@ -141,58 +141,237 @@
         Tambahkan surat
       </button>
     </div>
-    <table class="table datatable">
-      <thead>
-        <tr>
-          <th>NIK</th>
-          <th>Nama</th>
-          <th data-type="date" data-format="YYYY/DD/MM">Date</th>
-          <th>Status</th>
-          <th class="text-center">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for surat in suket %}
+    <div class="table-responsive">
+      <table class="table datatable">
+        <thead>
+          <tr>
+            <th>NIK</th>
+            <th>Nama</th>
+            <th data-type="date" data-format="YYYY/DD/MM">Date</th>
+            <th>Status</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if user.is_superuser %}
+          {% for surat in suket %}
 
-        <tr>
-          <td>{{ surat.nik }}</td>
-          <td>{{ surat.nama }}</td>
-          <td>{{ surat.date }}</td>
-          <td>{{surat.status}}</td>
-          <td class="text-center">
-            <!-- Btn-group untuk aksi -->
-            <div
-              class="btn-group gap-3"
-              role="group"
-              aria-label="Action buttons"
-            >
-              <a
-                href="{% url 'edit_suketbelummenikah' surat.id %}"
-                class="text-decoration-none"
+          <tr>
+            <td>
+              <a href="{% url 'detail_suketbelummenikah' surat.id %}"
+                >{{ surat.nik }}</a
               >
-                <button type="button" class="btn btn-warning btn-sm rounded-3">
-                  Edit
+            </td>
+            <td>{{ surat.nama }}</td>
+            <td>{{ surat.date }}</td>
+            {% if surat.status == 'review' %}
+            <td class="text-warning fw-bold">Proses Review</td>
+            {% elif surat.status == 'approved' %}
+            <td class="text-success fw-bold">Disetujui</td>
+            {% elif surat.status == 'rejected' %}
+            <td class="text-danger fw-bold">Ditolak</td>
+            {% endif %} {% if user.is_superuser %}
+
+            <td class="text-center">
+              <!-- Btn-group untuk aksi -->
+              <div
+                class="btn-group gap-3"
+                role="group"
+                aria-label="Action buttons"
+              >
+                <button type="button" class="btn btn-success btn-sm rounded-3">
+                  <a
+                    href="{% url 'setujui_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Setujui</a
+                  >
                 </button>
-              </a>
-              <a
-                href="{% url 'delete_suketbelummenikah' surat.id %}"
-                class="text-decoration-none"
-              >
-              <button type="button" class="btn btn-danger btn-sm rounded-3">
-                Delete
-              </button>
-              </a>
+                <button type="button" class="btn btn-danger btn-sm rounded-3">
+                  <a
+                    href="{% url 'tolak_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Tolak</a
+                  >
+                </button>
+              </div>
+            </td>
 
-              <button type="button" class="btn btn-primary btn-sm rounded-3">
-                Print
-              </button>
-              
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            {% else %}
+            <td class="text-center">
+              <!-- Btn-group untuk aksi -->
+              <div
+                class="btn-group gap-3"
+                role="group"
+                aria-label="Action buttons"
+              >
+                <a
+                  href="{% url 'edit_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-warning btn-sm rounded-3"
+                  >
+                    Edit
+                  </button>
+                </a>
+                <a
+                  href="{% url 'delete_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button type="button" class="btn btn-danger btn-sm rounded-3">
+                    Delete
+                  </button>
+                </a>
+
+                {% if surat.status == 'approved' %}
+
+                <a
+                  href="{% url 'print_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm rounded-3"
+                  >
+                    Print
+                  </button>
+                </a>
+
+                {% else %}
+
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm rounded-3"
+                  disabled
+                >
+                  <a
+                    href="{% url 'print_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Print
+                  </a>
+                </button>
+
+                {% endif %}
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+
+
+          {% else %}
+
+          {% for surat in private %}
+
+          <tr>
+            <td>
+              <a href="{% url 'detail_suketbelummenikah' surat.id %}"
+                >{{ surat.nik }}</a
+              >
+            </td>
+            <td>{{ surat.nama }}</td>
+            <td>{{ surat.date }}</td>
+            {% if surat.status == 'review' %}
+            <td class="text-warning fw-bold">Proses Review</td>
+            {% elif surat.status == 'approved' %}
+            <td class="text-success fw-bold">Disetujui</td>
+            {% elif surat.status == 'rejected' %}
+            <td class="text-danger fw-bold">Ditolak</td>
+            {% endif %} {% if user.is_superuser %}
+
+            <td class="text-center">
+              <!-- Btn-group untuk aksi -->
+              <div
+                class="btn-group gap-3"
+                role="group"
+                aria-label="Action buttons"
+              >
+                <button type="button" class="btn btn-success btn-sm rounded-3">
+                  <a
+                    href="{% url 'setujui_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Setujui</a
+                  >
+                </button>
+                <button type="button" class="btn btn-danger btn-sm rounded-3">
+                  <a
+                    href="{% url 'tolak_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Tolak</a
+                  >
+                </button>
+              </div>
+            </td>
+
+            {% else %}
+            <td class="text-center">
+              <!-- Btn-group untuk aksi -->
+              <div
+                class="btn-group gap-3"
+                role="group"
+                aria-label="Action buttons"
+              >
+                <a
+                  href="{% url 'edit_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-warning btn-sm rounded-3"
+                  >
+                    Edit
+                  </button>
+                </a>
+                <a
+                  href="{% url 'delete_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button type="button" class="btn btn-danger btn-sm rounded-3">
+                    Delete
+                  </button>
+                </a>
+
+                {% if surat.status == 'approved' %}
+
+                <a
+                  href="{% url 'print_suketbelummenikah' surat.id %}"
+                  class="text-decoration-none"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm rounded-3"
+                  >
+                    Print
+                  </button>
+                </a>
+
+                {% else %}
+
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm rounded-3"
+                  disabled
+                >
+                  <a
+                    href="{% url 'print_suketbelummenikah' surat.id %}"
+                    class="text-decoration-none text-white"
+                    >Print
+                  </a>
+                </button>
+
+                {% endif %}
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+
+
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
   </div>
   {% endif %}
 
@@ -221,7 +400,6 @@
 
               <!-- General Form Elements -->
 
-           
               <form method="post">
                 {% csrf_token %}
                 <div class="row mb-3">
@@ -322,7 +500,6 @@
                   </div>
                 </div>
               </form>
-           
 
               <!-- End General Form Elements -->
             </div>

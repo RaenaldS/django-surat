@@ -1,21 +1,283 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 import requests
 from django.shortcuts import get_object_or_404
 from .models import *
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth import authenticate ,login, logout
+from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
+from django.conf import settings
+import os
+from django.core.exceptions import SuspiciousFileOperation
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def dashboard(request):
     template_name = "backend/dashboard.html"
     
-    return render(request, template_name)
+    total_users = User.objects.count()
+    
+    # Menghitung total surat dari masing-masing model
+    total_surat_permohonan_ktp = SuketPermohonanKTP.objects.count()
+    total_surat_belum_menikah = SuketBelumMenikah.objects.count()
+    total_surat_tidak_mampu = SuketTidakMampu.objects.count()
+    total_skck = SKCK.objects.count()
+    total_suket_ktp_beda_nama = SuketKTPBedaNama.objects.count()
+    total_suket_ahli_waris = SuketAhliWaris.objects.count()
+    total_suket_mtq = SuketMTQ.objects.count()
+    total_suket_kehilangan = SuketKehilangan.objects.count()
+    total_suket_kelahiran = SuketKelahiran.objects.count()
+    total_suket_kematian = SuketKematian.objects.count()
+    total_suket_penghasilan_tidak_tetap = SuketPenghasilanTidakTetap.objects.count()
+    total_suket_usaha = SuketUsaha.objects.count()
+    total_suket_vaksin_nikah = SuketVaksinNikah.objects.count()
+    total_suket_pindah_nikah = SuketPindahNikah.objects.count()
+    total_suket_rek_kel_tani = SuketRekKelTani.objects.count()
+    
+    total_aduan = PengaduanAsing.objects.count()
+    
+    blg = Blog.objects.all().order_by('-id')[:5]
+    annc = Pengumuman.objects.all().order_by('-id')[:5]
 
+    # Menjumlahkan semua surat
+    total_surat = (
+        total_surat_permohonan_ktp +
+        total_surat_belum_menikah +
+        total_surat_tidak_mampu +
+        total_skck +
+        total_suket_ktp_beda_nama +
+        total_suket_ahli_waris +
+        total_suket_mtq +
+        total_suket_kehilangan +
+        total_suket_kelahiran +
+        total_suket_kematian +
+        total_suket_penghasilan_tidak_tetap +
+        total_suket_usaha +
+        total_suket_vaksin_nikah +
+        total_suket_pindah_nikah +
+        total_suket_rek_kel_tani
+    )# Menghitung jumlah seluruh user
+    
+     # Ambil surat-surat terbaru
+    recent_surat = []
+
+     # Gabungkan semua surat dan urutkan berdasarkan tanggal
+    surat_permohonan_ktp = SuketPermohonanKTP.objects.all().order_by('-date')
+    suket_belum_menikah = SuketBelumMenikah.objects.all().order_by('-date')
+    suket_tidak_mampu = SuketTidakMampu.objects.all().order_by('-date')
+    skck = SKCK.objects.all().order_by('-date')
+    suket_ktp_beda_nama = SuketKTPBedaNama.objects.all().order_by('-date')
+    suket_ahli_waris = SuketAhliWaris.objects.all().order_by('-date')
+    suket_mtq = SuketMTQ.objects.all().order_by('-date')
+    suket_kehilangan = SuketKehilangan.objects.all().order_by('-date')
+    suket_kelahiran = SuketKelahiran.objects.all().order_by('-date')
+    suket_kematian = SuketKematian.objects.all().order_by('-date')
+    suket_penghasilan_tidak_tetap = SuketPenghasilanTidakTetap.objects.all().order_by('-date')
+    suket_usaha = SuketUsaha.objects.all().order_by('-date')
+    suket_vaksin_nikah = SuketVaksinNikah.objects.all().order_by('-date')
+    suket_pindah_nikah = SuketPindahNikah.objects.all().order_by('-date')
+    suket_rek_kel_tani = SuketRekKelTani.objects.all().order_by('-date')
+
+    # Masukkan data surat dan tipe surat ke recent_surat
+    for surat in surat_permohonan_ktp:
+        recent_surat.append({'surat': surat, 'type': 'Surat Permohonan KTP'})
+    for surat in suket_belum_menikah:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Belum Menikah'})
+    for surat in suket_tidak_mampu:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Tidak Mampu'})
+    for surat in skck:
+        recent_surat.append({'surat': surat, 'type': 'SKCK'})
+    for surat in suket_ktp_beda_nama:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan KTP Beda Nama'})
+    for surat in suket_ahli_waris:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Ahli Waris'})
+    for surat in suket_mtq:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan MTQ'})
+    for surat in suket_kehilangan:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Kehilangan'})
+    for surat in suket_kelahiran:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Kelahiran'})
+    for surat in suket_kematian:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Kematian'})
+    for surat in suket_penghasilan_tidak_tetap:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Penghasilan Tidak Tetap'})
+    for surat in suket_usaha:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Usaha'})
+    for surat in suket_vaksin_nikah:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Vaksin Nikah'})
+    for surat in suket_pindah_nikah:
+        recent_surat.append({'surat': surat, 'type': 'Surat Keterangan Pindah Nikah'})
+    for surat in suket_rek_kel_tani:
+        recent_surat.append({'surat': surat, 'type': 'Surat Rek Kel Tani'})
+    
+    
+    context = {
+        'total_users': total_users, 
+        'total_surat' : total_surat,
+        'total_aduan' :total_aduan,
+        'recent_surat': recent_surat,
+        'blg': blg,
+        'annc':annc,
+    }
+    
+    return render(request, template_name, context)
+
+
+@login_required
+def suketpermohonanktp(request):
+    template_name = "backend/suketpermohonanktp.html"
+    
+    suket = SuketPermohonanKTP.objects.all().order_by('-date')
+    private = SuketPermohonanKTP.objects.filter(penulis=request.user).order_by('-date')
+    
+    if request.method == "POST":
+        fs = FileSystemStorage()
+
+        # Menyimpan file-file yang di-upload
+        pengantar_rt_file = request.FILES.get("pengantar_rt")
+        if pengantar_rt_file:
+            pengantar_rt_filename = fs.save(pengantar_rt_file.name, pengantar_rt_file)
+            pengantar_rt_url = fs.url(pengantar_rt_filename)
+        else:
+            pengantar_rt_url = None
+        
+        scankk_file = request.FILES.get("scankk")
+        if scankk_file:
+            scankk_filename = fs.save(scankk_file.name, scankk_file)
+            scankk_url = fs.url(scankk_filename)
+        else:
+            scankk_url = None
+
+        scan_ijazah_akta_file = request.FILES.get("scanijasahakta")
+        if scan_ijazah_akta_file:
+            scan_ijazah_akta_filename = fs.save(scan_ijazah_akta_file.name, scan_ijazah_akta_file)
+            scan_ijazah_akta_url = fs.url(scan_ijazah_akta_filename)
+        else:
+            scan_ijazah_akta_url = None
+
+        # Menyimpan data SuketPermohonanKTP
+        SuketPermohonanKTP.objects.create(
+            penulis=request.user,
+            nama=request.POST.get("inputNama"),
+            nokk=request.POST.get("inputNOKK"),
+            nik=request.POST.get("inputNIK"),
+            alamat=request.POST.get("inputAlamat"),
+            pengantarrt=pengantar_rt_url,
+            scankk=scankk_url,
+            scanijasahakta=scan_ijazah_akta_url,
+        )
+    
+        return redirect('suketpermohonanktp')
+    
+    context = {
+        "suket": suket,
+        'private': private
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
+def edit_suketpermohonanktp(request, id):
+    template_name = "backend/suketpermohonanktp.html"
+    
+    suket_id = get_object_or_404(SuketPermohonanKTP, id=id)
+    
+    if request.method == "POST":
+        fs = FileSystemStorage()
+
+        # Mengecek file baru yang di-upload dan menyimpannya
+        pengantar_rt_file = request.FILES.get("pengantar_rt")
+        if pengantar_rt_file:
+            pengantar_rt_filename = fs.save(pengantar_rt_file.name, pengantar_rt_file)
+            suket_id.pengantarrt = fs.url(pengantar_rt_filename)
+        
+        scankk_file = request.FILES.get("scankk")
+        if scankk_file:
+            scankk_filename = fs.save(scankk_file.name, scankk_file)
+            suket_id.scankk = fs.url(scankk_filename)
+        
+        scan_ijazah_akta_file = request.FILES.get("scanijasahakta")
+        if scan_ijazah_akta_file:
+            scan_ijazah_akta_filename = fs.save(scan_ijazah_akta_file.name, scan_ijazah_akta_file)
+            suket_id.scanijasahakta = fs.url(scan_ijazah_akta_filename)
+
+        # Mengedit data SuketPermohonanKTP
+        suket_id.penulis = request.user
+        suket_id.nama = request.POST.get("inputNama")
+        suket_id.nokk = request.POST.get("inputNOKK")
+        suket_id.nik = request.POST.get("inputNIK")
+        suket_id.alamat = request.POST.get("inputAlamat")
+        suket_id.date = timezone.now()
+        suket_id.status = 'review'
+        
+        suket_id.save()
+        
+        return redirect('suketpermohonanktp')
+    
+    context = {
+        "value": suket_id
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
+def setujui_suketpermohonanktp(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPermohonanKTP, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketpermohonanktp')
+
+@login_required
+def tolak_suketpermohonanktp(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPermohonanKTP, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketpermohonanktp')
+
+@login_required
+def delete_suketpermohonanktp(request, id):
+    SuketPermohonanKTP.objects.get(id=id).delete()
+    return redirect('suketpermohonanktp')
+
+@login_required
+def print_suketpermohonanktp(request, id):
+    template_name = "surat/surat-permohonan-ktp.html"
+    surat = get_object_or_404(SuketPermohonanKTP, id=id)
+
+    context = {
+        'nama': surat.nama,
+        'nokk': surat.nokk,
+        'nik': surat.nik,
+        'alamat': surat.alamat,
+        'date': surat.date,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
+def detail_suketpermohonanktp(request, id):
+    template_name = "backend/detail_suketpermohonanktp.html"
+    suket = get_object_or_404(SuketPermohonanKTP, id=id)
+    
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketbelummenikah(request):
     template_name = "backend/suketbelummenikah.html"
     
     suket = SuketBelumMenikah.objects.all()
+    private = SuketBelumMenikah.objects.filter(penulis=request.user)
     
     if request.method == "POST":
        
@@ -27,17 +289,20 @@ def suketbelummenikah(request):
             suku=request.POST.get("inputSuku"),
             agama=request.POST.get("inputAgama"),
             nik=request.POST.get("inputNIK"),
-            alamat=request.POST.get("inputAlamat")
+            alamat=request.POST.get("inputAlamat"),
+            
         )
     
         return redirect('suketbelummenikah')
     
     context={
-        "suket":suket
+        "suket":suket,
+        'private': private,
     }
     
     return render(request, template_name, context)
 
+@login_required
 def edit_suketbelummenikah(request,id):
     template_name = "backend/suketbelummenikah.html"
     
@@ -62,6 +327,7 @@ def edit_suketbelummenikah(request,id):
         suket_id.nik=nik
         suket_id.alamat=alamat
         suket_id.date=timezone.now()
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -74,17 +340,89 @@ def edit_suketbelummenikah(request,id):
     
     return render(request, template_name, context)
 
+@login_required
+def setujui_suketbelummenikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketBelumMenikah, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketbelummenikah')   # Redirect ke halaman list
+
+@login_required
+def tolak_suketbelummenikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketBelumMenikah, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketbelummenikah')  # Redirect ke halaman list
+
+@login_required
 def delete_suketbelummenikah(request,id):
     SuketBelumMenikah.objects.get(id=id).delete()
     
     return redirect('suketbelummenikah')
 
+@login_required
+def print_suketbelummenikah(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-ket-belum-nikah.html"
+    surat = get_object_or_404(SuketBelumMenikah, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'ttl': surat.ttl,
+        'suku': surat.suku,
+        'agama': surat.agama,
+        'nik': surat.nik,
+        'alamat': surat.alamat,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketbelummenikah(request, id):
+    template_name = "backend/detail_suketbelummenikah.html"  # Template baru untuk halaman detail
+    
+    # Mengambil objek surat berdasarkan ID
+    suket = get_object_or_404(SuketBelumMenikah, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+   
+@login_required
 def sukettidakmampu(request):
     template_name = "backend/sukettidakmampu.html"
     
     suket = SuketTidakMampu.objects.all()
+    private = SuketTidakMampu.objects.filter(penulis=request.user)
     
     if request.method == "POST":
+        
+        fs = FileSystemStorage()
+
+        # Menyimpan file-file yang di-upload
+        pengantar_rt_file = request.FILES.get("pengantar_rt")
+        if pengantar_rt_file:
+            pengantar_rt_filename = fs.save(pengantar_rt_file.name, pengantar_rt_file)
+            pengantar_rt_url = fs.url(pengantar_rt_filename)
+        else:
+            pengantar_rt_url = None
+        
+        scankk_file = request.FILES.get("scankk")
+        if scankk_file:
+            scankk_filename = fs.save(scankk_file.name, scankk_file)
+            scankk_url = fs.url(scankk_filename)
+        else:
+            scankk_url = None
        
         SuketTidakMampu.objects.create(
             penulis=request.user,
@@ -95,23 +433,43 @@ def sukettidakmampu(request):
             agama=request.POST.get("inputAgama"),
             nik=request.POST.get("inputNIK"),
             alamat=request.POST.get("inputAlamat"),
-            pekerjaan= request.POST.get("inputPekerjaan")
+            pekerjaan= request.POST.get("inputPekerjaan"),
+            pengantarrt=pengantar_rt_url,
+            scankk=scankk_url,
         )
     
         return redirect('sukettidakmampu')
     
     context={
-        "suket":suket
+        "suket":suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
+@login_required
 def edit_sukettidakmampu(request,id):
     template_name = "backend/sukettidakmampu.html"
     
     suket_id = SuketTidakMampu.objects.get(id=id)
     
     if request.method == "POST":
+        
+        fs = FileSystemStorage()
+
+        # Mengecek file baru yang di-upload dan menyimpannya
+        pengantar_rt_file = request.FILES.get("pengantar_rt")
+        
+        if pengantar_rt_file:
+            pengantar_rt_filename = fs.save(pengantar_rt_file.name, pengantar_rt_file)
+            suket_id.pengantarrt = fs.url(pengantar_rt_filename)
+        
+        scankk_file = request.FILES.get("scankk")
+       
+        if scankk_file:
+            scankk_filename = fs.save(scankk_file.name, scankk_file)
+            suket_id.scankk = fs.url(scankk_filename)
+        
         penulis=request.user
         nama=request.POST.get("inputNama")
         jenis_kelamin=request.POST.get("inputjk")
@@ -132,6 +490,7 @@ def edit_sukettidakmampu(request,id):
         suket_id.alamat=alamat
         suket_id.date=timezone.now()
         suket_id.pekerjaan= pekerjaan
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -144,15 +503,70 @@ def edit_sukettidakmampu(request,id):
     
     return render(request, template_name, context)
 
+@login_required
+def setujui_sukettidakmampu(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketTidakMampu, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('sukettidakmampu')  # Redirect ke halaman list Suket Tidak Mampu
+
+@login_required
+def tolak_sukettidakmampu(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketTidakMampu, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('sukettidakmampu')  # Redirect ke halaman list Suket Tidak Mampu
+
+@login_required
 def delete_sukettidakmampu(request,id):
     SuketTidakMampu.objects.get(id=id).delete()
     
     return redirect('sukettidakmampu')
 
+@login_required
+def print_sukettidakmampu(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-tidak-mampu.html"
+    surat = get_object_or_404(SuketTidakMampu, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'ttl': surat.ttl,
+        'suku': surat.suku,
+        'agama': surat.agama,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'nik': surat.nik,
+        'pekerjaan': surat.pekerjaan,
+        'alamat': surat.alamat,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_sukettidakmampu(request, id):
+    template_name = "backend/detail_sukettidakmampu.html"  # Template baru untuk halaman detail
+    
+    # Mengambil objek surat berdasarkan ID
+    suket = get_object_or_404(SuketTidakMampu, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def skck(request):
     template_name = "backend/skck.html"
     
     suket = SKCK.objects.all()
+    private = SKCK.objects.filter(penulis=request.user)
     
     if request.method == "POST":
        
@@ -180,11 +594,13 @@ def skck(request):
         return redirect('skck')
     
     context={
-        "suket":suket
+        "suket":suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
+@login_required
 def edit_skck(request,id):
     template_name = "backend/skck.html"
     
@@ -224,6 +640,7 @@ def edit_skck(request,id):
         suket_id.pekerjaan= pekerjaan
         suket_id.kawin= kawin
         suket_id.pendidikanterakhir= pendidikanterakhir
+        suket_id.status='review'
        
         
         suket_id.save()
@@ -237,15 +654,72 @@ def edit_skck(request,id):
     
     return render(request, template_name, context)
 
+@login_required
+def setujui_skck(request, id):
+    if request.user.is_superuser:
+        skck = get_object_or_404(SKCK, id=id)
+        skck.status = 'approved'  # Mengubah status menjadi Disetujui
+        skck.save()
+    return redirect('skck')  # Redirect ke halaman list SKCK
+
+@login_required
+def tolak_skck(request, id):
+    if request.user.is_superuser:
+        skck = get_object_or_404(SKCK, id=id)
+        skck.status = 'rejected'  # Mengubah status menjadi Ditolak
+        skck.save()
+    return redirect('skck')  # Redirect ke halaman list SKCK
+
+@login_required
 def delete_skck(request,id):
     SKCK.objects.get(id=id).delete()
     
     return redirect('skck')
 
+@login_required
+def print_skck(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/skck.html"
+    surat = get_object_or_404(SKCK, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'ttl': surat.ttl,
+        'agama': surat.agama,
+        'kawin': surat.kawin,
+        'pekerjaan': surat.pekerjaan,
+        'suku': surat.suku,
+        'nik': surat.nik,
+        'alamat': surat.alamat,
+        'pendidikanterakhir': surat.pendidikanterakhir,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_skck(request, id):
+    template_name = "backend/detail_skck.html"  # Template baru untuk halaman detail SKCK
+    
+    # Mengambil objek SKCK berdasarkan ID
+    skck = get_object_or_404(SKCK, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'skck': skck,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketktpbedanama(request):
     template_name = "backend/suketktpbedanama.html"
     
     suket = SuketKTPBedaNama.objects.all()
+    private =SuketKTPBedaNama.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Membuat SuketKTPBedaNama baru
@@ -262,12 +736,13 @@ def suketktpbedanama(request):
         return redirect('suketktpbedanama')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private,
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit SuketKTPBedaNama
+@login_required
 def edit_suketktpbedanama(request, id):
     template_name = "backend/suketktpbedanama.html"
     
@@ -291,6 +766,7 @@ def edit_suketktpbedanama(request, id):
         suket_id.alamat = alamat
         suket_id.pekerjaan = pekerjaan
         suket_id.date = timezone.now() 
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -302,20 +778,124 @@ def edit_suketktpbedanama(request, id):
     
     return render(request, template_name, context)
 
+@login_required
+def setujui_suketktpbedanama(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKTPBedaNama, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketktpbedanama')  # Redirect ke halaman list Suket KTP Beda Nama
 
+@login_required
+def tolak_suketktpbedanama(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKTPBedaNama, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketktpbedanama')  # Redirect ke halaman list Suket KTP Beda Nama
+
+@login_required
 def delete_suketktpbedanama(request, id):
  
     SuketKTPBedaNama.objects.get(id=id).delete()
     
     return redirect('suketktpbedanama')
 
+@login_required
+def print_suketktpbedanama(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-ket-beda-nama-dgn-ktp.html"
+    surat = get_object_or_404(SuketKTPBedaNama, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'ttl': surat.ttl,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'pekerjaan': surat.pekerjaan,
+        'agama': surat.agama,
+        'alamat': surat.alamat,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketktpbedanama(request, id):
+    template_name = "backend/detail_suketktpbedanama.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketKTPBedaNama berdasarkan ID
+    suket = get_object_or_404(SuketKTPBedaNama, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketahliwaris(request):
     template_name = "backend/suketahliwaris.html"
     
     suket = SuketAhliWaris.objects.all()
+    private =SuketAhliWaris.objects.filter(penulis=request.user)
     
     if request.method == "POST":
-        # Membuat SuketAhliWaris baru
+        # Menyimpan file-file yang di-upload
+        fs = FileSystemStorage()
+
+        skkematian_file = request.FILES.get("skkematian")
+        if skkematian_file:
+            skkematian_filename = fs.save(skkematian_file.name, skkematian_file)
+            skkematian_url = fs.url(skkematian_filename)
+        else:
+            skkematian_url = None
+
+        scanktpkkahliwaris1_file = request.FILES.get("scanktpkkahliwaris1")
+        if scanktpkkahliwaris1_file:
+            scanktpkkahliwaris1_filename = fs.save(scanktpkkahliwaris1_file.name, scanktpkkahliwaris1_file)
+            scanktpkkahliwaris1_url = fs.url(scanktpkkahliwaris1_filename)
+        else:
+            scanktpkkahliwaris1_url = None
+
+        scanktpkkahliwaris2_file = request.FILES.get("scanktpkkahliwaris2")
+        if scanktpkkahliwaris2_file:
+            scanktpkkahliwaris2_filename = fs.save(scanktpkkahliwaris2_file.name, scanktpkkahliwaris2_file)
+            scanktpkkahliwaris2_url = fs.url(scanktpkkahliwaris2_filename)
+        else:
+            scanktpkkahliwaris2_url = None
+
+        scanktpkkahliwaris3_file = request.FILES.get("scanktpkkahliwaris3")
+        if scanktpkkahliwaris3_file:
+            scanktpkkahliwaris3_filename = fs.save(scanktpkkahliwaris3_file.name, scanktpkkahliwaris3_file)
+            scanktpkkahliwaris3_url = fs.url(scanktpkkahliwaris3_filename)
+        else:
+            scanktpkkahliwaris3_url = None
+
+        scanktpkkahliwaris4_file = request.FILES.get("scanktpkkahliwaris4")
+        if scanktpkkahliwaris4_file:
+            scanktpkkahliwaris4_filename = fs.save(scanktpkkahliwaris4_file.name, scanktpkkahliwaris4_file)
+            scanktpkkahliwaris4_url = fs.url(scanktpkkahliwaris4_filename)
+        else:
+            scanktpkkahliwaris4_url = None
+
+        scanktpsaksi1_file = request.FILES.get("scanktpsaksi1")
+        if scanktpsaksi1_file:
+            scanktpsaksi1_filename = fs.save(scanktpsaksi1_file.name, scanktpsaksi1_file)
+            scanktpsaksi1_url = fs.url(scanktpsaksi1_filename)
+        else:
+            scanktpsaksi1_url = None
+
+        scanktpsaksi2_file = request.FILES.get("scanktpsaksi2")
+        if scanktpsaksi2_file:
+            scanktpsaksi2_filename = fs.save(scanktpsaksi2_file.name, scanktpsaksi2_file)
+            scanktpsaksi2_url = fs.url(scanktpsaksi2_filename)
+        else:
+            scanktpsaksi2_url = None
+
+        # Menyimpan data SuketAhliWaris
         SuketAhliWaris.objects.create(
             penulis=request.user,
             nama1=request.POST.get("inputNama1"),
@@ -329,54 +909,86 @@ def suketahliwaris(request):
             alamat3=request.POST.get("inputAlamat3"),
             nama4=request.POST.get("inputNama4"),
             ttl4=request.POST.get("inputTtl4"),
-            alamat4=request.POST.get("inputAlamat4")
+            alamat4=request.POST.get("inputAlamat4"),
+            skkematian=skkematian_url,
+            scanktpkkahliwaris1=scanktpkkahliwaris1_url,
+            scanktpkkahliwaris2=scanktpkkahliwaris2_url,
+            scanktpkkahliwaris3=scanktpkkahliwaris3_url,
+            scanktpkkahliwaris4=scanktpkkahliwaris4_url,
+            scanktpsaksi1=scanktpsaksi1_url,
+            scanktpsaksi2=scanktpsaksi2_url,
         )
     
         return redirect('suketahliwaris')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private,
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit SuketAhliWaris
+@login_required
 def edit_suketahliwaris(request, id):
     template_name = "backend/suketahliwaris.html"
     
     suket_id = SuketAhliWaris.objects.get(id=id)
     
     if request.method == "POST":
-        # Mengedit data SuketAhliWaris
-        penulis = request.user
-        nama1 = request.POST.get("inputNama1")
-        ttl1 = request.POST.get("inputTtl1")
-        alamat1 = request.POST.get("inputAlamat1")
-        nama2 = request.POST.get("inputNama2")
-        ttl2 = request.POST.get("inputTtl2")
-        alamat2 = request.POST.get("inputAlamat2")
-        nama3 = request.POST.get("inputNama3")
-        ttl3 = request.POST.get("inputTtl3")
-        alamat3 = request.POST.get("inputAlamat3")
-        nama4 = request.POST.get("inputNama4")
-        ttl4 = request.POST.get("inputTtl4")
-        alamat4 = request.POST.get("inputAlamat4")
-        
-        suket_id.penulis = penulis
-        suket_id.nama1 = nama1
-        suket_id.ttl1 = ttl1
-        suket_id.alamat1 = alamat1
-        suket_id.nama2 = nama2
-        suket_id.ttl2 = ttl2
-        suket_id.alamat2 = alamat2
-        suket_id.nama3 = nama3
-        suket_id.ttl3 = ttl3
-        suket_id.alamat3 = alamat3
-        suket_id.nama4 = nama4
-        suket_id.ttl4 = ttl4
-        suket_id.alamat4 = alamat4
-        suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
-        
+        fs = FileSystemStorage()
+
+        skkematian_file = request.FILES.get("skkematian")
+        if skkematian_file:
+            skkematian_filename = fs.save(skkematian_file.name, skkematian_file)
+            suket_id.skkematian = fs.url(skkematian_filename)
+
+        scanktpkkahliwaris1_file = request.FILES.get("scanktpkkahliwaris1")
+        if scanktpkkahliwaris1_file:
+            scanktpkkahliwaris1_filename = fs.save(scanktpkkahliwaris1_file.name, scanktpkkahliwaris1_file)
+            suket_id.scanktpkkahliwaris1 = fs.url(scanktpkkahliwaris1_filename)
+
+        scanktpkkahliwaris2_file = request.FILES.get("scanktpkkahliwaris2")
+        if scanktpkkahliwaris2_file:
+            scanktpkkahliwaris2_filename = fs.save(scanktpkkahliwaris2_file.name, scanktpkkahliwaris2_file)
+            suket_id.scanktpkkahliwaris2 = fs.url(scanktpkkahliwaris2_filename)
+
+        scanktpkkahliwaris3_file = request.FILES.get("scanktpkkahliwaris3")
+        if scanktpkkahliwaris3_file:
+            scanktpkkahliwaris3_filename = fs.save(scanktpkkahliwaris3_file.name, scanktpkkahliwaris3_file)
+            suket_id.scanktpkkahliwaris3 = fs.url(scanktpkkahliwaris3_filename)
+
+        scanktpkkahliwaris4_file = request.FILES.get("scanktpkkahliwaris4")
+        if scanktpkkahliwaris4_file:
+            scanktpkkahliwaris4_filename = fs.save(scanktpkkahliwaris4_file.name, scanktpkkahliwaris4_file)
+            suket_id.scanktpkkahliwaris4 = fs.url(scanktpkkahliwaris4_filename)
+
+        scanktpsaksi1_file = request.FILES.get("scanktpsaksi1")
+        if scanktpsaksi1_file:
+            scanktpsaksi1_filename = fs.save(scanktpsaksi1_file.name, scanktpsaksi1_file)
+            suket_id.scanktpsaksi1 = fs.url(scanktpsaksi1_filename)
+
+        scanktpsaksi2_file = request.FILES.get("scanktpsaksi2")
+        if scanktpsaksi2_file:
+            scanktpsaksi2_filename = fs.save(scanktpsaksi2_file.name, scanktpsaksi2_file)
+            suket_id.scanktpsaksi2 = fs.url(scanktpsaksi2_filename)
+
+        # Mengupdate data lainnya
+        suket_id.penulis = request.user
+        suket_id.nama1 = request.POST.get("inputNama1")
+        suket_id.ttl1 = request.POST.get("inputTtl1")
+        suket_id.alamat1 = request.POST.get("inputAlamat1")
+        suket_id.nama2 = request.POST.get("inputNama2")
+        suket_id.ttl2 = request.POST.get("inputTtl2")
+        suket_id.alamat2 = request.POST.get("inputAlamat2")
+        suket_id.nama3 = request.POST.get("inputNama3")
+        suket_id.ttl3 = request.POST.get("inputTtl3")
+        suket_id.alamat3 = request.POST.get("inputAlamat3")
+        suket_id.nama4 = request.POST.get("inputNama4")
+        suket_id.ttl4 = request.POST.get("inputTtl4")
+        suket_id.alamat4 = request.POST.get("inputAlamat4")
+        suket_id.date = timezone.now()
+        suket_id.status = 'review'
+
         suket_id.save()
         
         return redirect('suketahliwaris')
@@ -387,17 +999,75 @@ def edit_suketahliwaris(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus SuketAhliWaris
+@login_required
+def setujui_suketahliwaris(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketAhliWaris, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketahliwaris')  # Redirect ke halaman list Suket Ahli Waris
+
+@login_required
+def tolak_suketahliwaris(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketAhliWaris, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketahliwaris')  # Redirect ke halaman list Suket Ahli Waris
+
+@login_required
 def delete_suketahliwaris(request, id):
     # Menghapus data berdasarkan id
     SuketAhliWaris.objects.get(id=id).delete()
     
     return redirect('suketahliwaris')
 
+@login_required
+def print_suketahliwaris(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-ahli-waris.html"
+    surat = get_object_or_404(SuketAhliWaris, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama1': surat.nama1,
+        'ttl1': surat.ttl1,
+        'alamat1': surat.alamat1,
+        'nama2': surat.nama2,
+        'ttl2': surat.ttl2,
+        'alamat2': surat.alamat2,
+        'nama3': surat.nama3,
+        'ttl3': surat.ttl3,
+        'alamat3': surat.alamat3,
+        'nama4': surat.nama4,
+        'ttl4': surat.ttl4,
+        'alamat4': surat.alamat4,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketahliwaris(request, id):
+    template_name = "backend/detail_suketahliwaris.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketAhliWaris berdasarkan ID
+    suket = get_object_or_404(SuketAhliWaris, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketMTQ(request):
     template_name = "backend/suketMTQ.html"
     
     suket = SuketMTQ.objects.all()
+    private =SuketMTQ.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Membuat SuketMTQ baru
@@ -415,12 +1085,13 @@ def suketMTQ(request):
         return redirect('suketMTQ')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit SuketMTQ
+@login_required
 def edit_suketMTQ(request, id):
     template_name = "backend/suketMTQ.html"
     
@@ -446,6 +1117,7 @@ def edit_suketMTQ(request, id):
         suket_id.alamat = alamat
         suket_id.pekerjaan = pekerjaan
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -457,17 +1129,71 @@ def edit_suketMTQ(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus SuketMTQ
+@login_required
+def setujui_suketmtq(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketMTQ, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketMTQ')
+# Redirect ke halaman list Suket MTQ
+@login_required
+def tolak_suketmtq(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketMTQ, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketMTQ')  # Redirect ke halaman list Suket MTQ
+
+@login_required
 def delete_suketMTQ(request, id):
     # Menghapus data berdasarkan id
     SuketMTQ.objects.get(id=id).delete()
     
+    
     return redirect('suketMTQ')
 
+@login_required
+def print_suketMTQ(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-domisili-mtq-baru.html"
+    surat = get_object_or_404(SuketMTQ, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'ttl': surat.ttl,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'suku': surat.suku,
+        'agama': surat.agama,
+        'pekerjaan': surat.pekerjaan,
+        'alamat': surat.alamat,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketmtq(request, id):
+    template_name = "backend/detail_suketmtq.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketMTQ berdasarkan ID
+    suket = get_object_or_404(SuketMTQ, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketkehilangan(request):
     template_name = "backend/suketkehilangan.html"
     
     suket = SuketKehilangan.objects.all()
+    private =SuketKehilangan.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Membuat SuketKehilangan baru
@@ -488,12 +1214,13 @@ def suketkehilangan(request):
         return redirect('suketkehilangan')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit SuketKehilangan
+@login_required
 def edit_suketkehilangan(request, id):
     template_name = "backend/suketkehilangan.html"
     
@@ -525,6 +1252,7 @@ def edit_suketkehilangan(request, id):
         suket_id.tempat1 = tempat1
         suket_id.tempat2 = tempat2
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -536,17 +1264,73 @@ def edit_suketkehilangan(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus SuketKehilangan
+@login_required
+def setujui_suketkehilangan(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKehilangan, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketkehilangan')  # Redirect ke halaman list Suket Kehilangan
+
+@login_required
+def tolak_suketkehilangan(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKehilangan, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketkehilangan')  # Redirect ke halaman list Suket Kehilangan
+
+@login_required
 def delete_suketkehilangan(request, id):
     # Menghapus data berdasarkan id
     SuketKehilangan.objects.get(id=id).delete()
     
     return redirect('suketkehilangan')
 
+@login_required
+def print_suketkehilangan(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-kehilangan.html"
+    surat = get_object_or_404(SuketKehilangan, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'jenis_kelamin': surat.jenis_kelamin,
+        'umur': surat.umur,
+        'pekerjaan': surat.pekerjaan,
+        'alamat': surat.alamat,
+        'barang1': surat.barang1,
+        'barang2': surat.barang2,
+        'barang3': surat.barang3,
+        'tempat1': surat.tempat1,
+        'tempat2': surat.tempat2,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketkehilangan(request, id):
+    template_name = "backend/detail_suketkehilangan.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketKehilangan berdasarkan ID
+    suket = get_object_or_404(SuketKehilangan, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketkelahiran(request):
     template_name = "backend/suketkelahiran.html"
     
     suket = SuketKelahiran.objects.all()
+    private =SuketKelahiran.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Menyimpan file-file yang di-upload
@@ -631,12 +1415,13 @@ def suketkelahiran(request):
         return redirect('suketkelahiran')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private,
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit SuketKelahiran
+@login_required
 def edit_suketkelahiran(request, id):
     template_name = "backend/suketkelahiran.html"
     
@@ -714,6 +1499,7 @@ def edit_suketkelahiran(request, id):
         suket_id.pekerjaani = request.POST.get("inputPekerjaanI")
         suket_id.alamati = request.POST.get("inputAlamatI")
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
+        suket_id.status='review'
         
         suket_id.save()
         
@@ -725,16 +1511,77 @@ def edit_suketkelahiran(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus SuketKelahiran
+@login_required
+def setujui_suketkelahiran(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKelahiran, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketkelahiran')  # Redirect ke halaman list Suket Kelahiran
+
+@login_required
+def tolak_suketkelahiran(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKelahiran, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketkelahiran')  # Redirect ke halaman list Suket Kelahiran
+
+@login_required
 def delete_suketkelahiran(request, id):
     SuketKelahiran.objects.get(id=id).delete()
     
     return redirect('suketkelahiran')
 
+@login_required
+def print_suketkelahiran(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-kelahiran.html"
+    surat = get_object_or_404(SuketKelahiran, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'namab': surat.namab,
+        'jenis_kelaminb': surat.jenis_kelaminb,
+        'tanggal_lahirb': surat.tanggal_lahirb,
+        'tempat_lahirb': surat.tempat_lahirb,
+        'agamab': surat.agamab,
+        'alamatb': surat.alamatb,
+        'anakke': surat.anakke,
+        'namaa': surat.namaa,
+        'umura': surat.umura,
+        'pekerjaana': surat.pekerjaana,
+        'alamata': surat.alamata,
+        'namai': surat.namai,
+        'umuri': surat.umuri,
+        'pekerjaani': surat.pekerjaani,
+        'alamati': surat.alamati,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketkelahiran(request, id):
+    template_name = "backend/detail_suketkelahiran.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketKelahiran berdasarkan ID
+    suket = get_object_or_404(SuketKelahiran, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketkematian(request):
     template_name = "backend/suketkematian.html"
     
     suket = SuketKematian.objects.all()
+    private =SuketKematian.objects.filter(penulis=request.user)
     
     if request.method == "POST":
        
@@ -788,12 +1635,13 @@ def suketkematian(request):
         return redirect('suketkematian')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private 
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Kematian
+@login_required
 def edit_suketkematian(request, id):
     template_name = "backend/suketkematian.html"
     
@@ -863,6 +1711,7 @@ def edit_suketkematian(request, id):
         suket_id.tanggal_pmkn = tanggal_pmkn
         suket_id.jam_pmkn = jam_pmkn
         suket_id.date = timezone.now()
+        suket_id.status='review'
 
         suket_id.save()
         
@@ -874,15 +1723,82 @@ def edit_suketkematian(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Kematian
+@login_required
+def setujui_suketkematian(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKematian, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketkematian')  # Redirect ke halaman list Suket Kematian
+
+@login_required
+def tolak_suketkematian(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketKematian, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketkematian')  # Redirect ke halaman list Suket Kematian
+
+@login_required
 def delete_suketkematian(request, id):
     SuketKematian.objects.get(id=id).delete()
     return redirect('suketkematian')
 
+@login_required
+def print_suketkematian(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-kematian.html"
+    surat = get_object_or_404(SuketKematian, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+        'nama': surat.nama,
+        'nip': surat.nip,
+        'jabatan': surat.jabatan,
+        'nokk': surat.nokk,
+        'namaalm': surat.namaalm,
+        'nikalm': surat.nikalm,
+        'ttlalm': surat.ttlalm,
+        'agamaalm': surat.agamaalm,
+        'anakkealm': surat.anakkealm,
+        'ibualm': surat.ibualm,
+        'ayahalm': surat.ayahalm,
+        'pekerjaanalm': surat.pekerjaanalm,
+        'kewarganegaraanalm': surat.kewarganegaraanalm,
+        'alamatalm': surat.alamatalm,
+        'tanggal_kematian': surat.tanggal_kematian,
+        'jam_kematian': surat.jam_kematian,
+        'tempat_kematian': surat.tempat_kematian,
+        'penyebab_kematian': surat.penyebab_kematian,
+        'tmptmakam': surat.tmptmakam,
+        'tanggal_pmkn': surat.tanggal_pmkn,
+        'jam_pmkn': surat.jam_pmkn,
+        'date': surat.date,
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketkematian(request, id):
+    template_name = "backend/detail_suketkematian.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketKematian berdasarkan ID
+    suket = get_object_or_404(SuketKematian, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketpenghasilantidaktetap(request):
     template_name = "backend/suketpenghasilantidaktetap.html"
     
     suket = SuketPenghasilanTidakTetap.objects.all()
+    private = SuketPenghasilanTidakTetap.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Mengambil file yang diupload
@@ -919,12 +1835,13 @@ def suketpenghasilantidaktetap(request):
         return redirect('suketpenghasilantidaktetap')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Penghasilan Tidak Tetap
+@login_required
 def edit_suketpenghasilantidaktetap(request, id):
     template_name = "backend/suketpenghasilantidaktetap.html"
     
@@ -960,6 +1877,7 @@ def edit_suketpenghasilantidaktetap(request, id):
         suket_id.pekerjaan = pekerjaan
         suket_id.alamat = alamat
         suket_id.date = timezone.now()
+        suket_id.status='review'
 
         suket_id.save()
         
@@ -971,15 +1889,65 @@ def edit_suketpenghasilantidaktetap(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Penghasilan Tidak Tetap
+@login_required
+def setujui_suketpenghasilantidaktetap(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPenghasilanTidakTetap, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketpenghasilantidaktetap') 
+# Redirect ke halaman list Suket Penghasilan Tidak Tetap
+@login_required
+def tolak_suketpenghasilantidaktetap(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPenghasilanTidakTetap, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketpenghasilantidaktetap')  # Redirect ke halaman list Suket Penghasilan Tidak Tetap
+
+@login_required
 def delete_suketpenghasilantidaktetap(request, id):
     SuketPenghasilanTidakTetap.objects.get(id=id).delete()
     return redirect('suketpenghasilantidaktetap')
 
+@login_required
+def print_suketpenghasilantidaktetap(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-penghasilan-tidak-tetap.html"
+    surat = get_object_or_404(SuketPenghasilanTidakTetap, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+    'nama': surat.nama,
+    'umur': surat.umur,
+    'pekerjaan': surat.pekerjaan,
+    'alamat': surat.alamat,
+    'date': surat.date,
+}
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketpenghasilantidaktetap(request, id):
+    template_name = "backend/detail_suketpenghasilantidaktetap.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketPenghasilanTidakTetap berdasarkan ID
+    suket = get_object_or_404(SuketPenghasilanTidakTetap, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketusaha(request):
     template_name = "backend/suketusaha.html"
     
     suket = SuketUsaha.objects.all()
+    private = SuketUsaha.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Mengambil file yang diupload
@@ -1033,12 +2001,13 @@ def suketusaha(request):
         return redirect('suketusaha')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Usaha
+@login_required
 def edit_suketusaha(request, id):
     template_name = "backend/suketusaha.html"
     
@@ -1096,6 +2065,7 @@ def edit_suketusaha(request, id):
         suket_id.jumlahkaryawan = jumlahkaryawan
         suket_id.keterangan = keterangan
         suket_id.date = timezone.now()
+        suket_id.status='review'
 
         suket_id.save()
         
@@ -1107,15 +2077,73 @@ def edit_suketusaha(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Usaha
+@login_required
+def setujui_suketusaha(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketUsaha, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketusaha')  # Redirect ke halaman list Suket Usaha
+
+@login_required
+def tolak_suketusaha(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketUsaha, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketusaha')  # Redirect ke halaman list Suket Usaha
+
+@login_required
 def delete_suketusaha(request, id):
     SuketUsaha.objects.get(id=id).delete()
     return redirect('suketusaha')
 
+@login_required
+def print_suketusaha(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-usaha.html"
+    surat = get_object_or_404(SuketUsaha, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+    'nama': surat.nama,
+    'umur': surat.umur,
+    'pekerjaan': surat.pekerjaan,
+    'alamat': surat.alamat,
+    'jenisusaha': surat.jenisusaha,
+    'tahunberdiri': surat.tahunberdiri,
+    'jumlahmodal': surat.jumlahmodal,
+    'alamatusaha': surat.alamatusaha,
+    'npnpwp': surat.npnpwp,
+    'notelepon': surat.notelepon,
+    'jumlahkaryawan': surat.jumlahkaryawan,
+    'keterangan': surat.keterangan,
+    'date': surat.date,
+}
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketusaha(request, id):
+    template_name = "backend/detail_suketusaha.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketUsaha berdasarkan ID
+    suket = get_object_or_404(SuketUsaha, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketvaksinnikah(request):
     template_name = "backend/suketvaksinnikah.html"
     
     suket = SuketVaksinNikah.objects.all()
+    private = SuketVaksinNikah.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Membuat objek SuketVaksinNikah baru
@@ -1132,12 +2160,13 @@ def suketvaksinnikah(request):
         return redirect('suketvaksinnikah')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Vaksin Nikah
+@login_required
 def edit_suketvaksinnikah(request, id):
     template_name = "backend/suketvaksinnikah.html"
     
@@ -1162,6 +2191,7 @@ def edit_suketvaksinnikah(request, id):
         suket_id.pekerjaan = pekerjaan
         suket_id.alamat = alamat
         suket_id.date = timezone.now()
+        suket_id.status='review'
 
         suket_id.save()
         
@@ -1173,18 +2203,123 @@ def edit_suketvaksinnikah(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Vaksin Nikah
+@login_required
+def setujui_suketvaksinnikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketVaksinNikah, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketvaksinnikah')  # Redirect ke halaman list Suket Vaksin Nikah
+
+@login_required
+def tolak_suketvaksinnikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketVaksinNikah, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketvaksinnikah')  # Redirect ke halaman list Suket Vaksin Nikah
+
+
+@login_required
 def delete_suketvaksinnikah(request, id):
     SuketVaksinNikah.objects.get(id=id).delete()
     return redirect('suketvaksinnikah')
 
+@login_required
+def print_suketvaksinnikah(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-vaksin-nikah.html"
+    surat = get_object_or_404(SuketVaksinNikah, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+    'nama': surat.nama,
+    'jenis_kelamin': surat.jenis_kelamin,
+    'ttl': surat.ttl,
+    'agama': surat.agama,
+    'pekerjaan': surat.pekerjaan,
+    'alamat': surat.alamat,
+    'date': surat.date,
+}
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketvaksinnikah(request, id):
+    template_name = "backend/detail_suketvaksinnikah.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketVaksinNikah berdasarkan ID
+    suket = get_object_or_404(SuketVaksinNikah, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketpindahnikah(request):
     template_name = "backend/suketpindahnikah.html"
     
     suket = SuketPindahNikah.objects.all()
+    private = SuketPindahNikah.objects.filter(penulis=request.user)
     
     if request.method == "POST":
-        # Membuat objek SuketPindahNikah baru
+        # Menyimpan file-file yang di-upload
+        fs = FileSystemStorage()
+
+        pengantarrt_file = request.FILES.get("pengantarrt")
+        if pengantarrt_file:
+            pengantarrt_filename = fs.save(pengantarrt_file.name, pengantarrt_file)
+            pengantarrt_url = fs.url(pengantarrt_filename)
+        else:
+            pengantarrt_url = None
+
+        scankksuami_file = request.FILES.get("scankksuami")
+        if scankksuami_file:
+            scankksuami_filename = fs.save(scankksuami_file.name, scankksuami_file)
+            scankksuami_url = fs.url(scankksuami_filename)
+        else:
+            scankksuami_url = None
+
+        scankkistri_file = request.FILES.get("scankkistri")
+        if scankkistri_file:
+            scankkistri_filename = fs.save(scankkistri_file.name, scankkistri_file)
+            scankkistri_url = fs.url(scankkistri_filename)
+        else:
+            scankkistri_url = None
+
+        scanktpsuami_file = request.FILES.get("scanktpsuami")
+        if scanktpsuami_file:
+            scanktpsuami_filename = fs.save(scanktpsuami_file.name, scanktpsuami_file)
+            scanktpsuami_url = fs.url(scanktpsuami_filename)
+        else:
+            scanktpsuami_url = None
+
+        scanktpistri_file = request.FILES.get("scanktpistri")
+        if scanktpistri_file:
+            scanktpistri_filename = fs.save(scanktpistri_file.name, scanktpistri_file)
+            scanktpistri_url = fs.url(scanktpistri_filename)
+        else:
+            scanktpistri_url = None
+
+        fotogandeng_file = request.FILES.get("fotogandeng")
+        if fotogandeng_file:
+            fotogandeng_filename = fs.save(fotogandeng_file.name, fotogandeng_file)
+            fotogandeng_url = fs.url(fotogandeng_filename)
+        else:
+            fotogandeng_url = None
+
+        aktaceraikematian_file = request.FILES.get("aktaceraikematian")
+        if aktaceraikematian_file:
+            aktaceraikematian_filename = fs.save(aktaceraikematian_file.name, aktaceraikematian_file)
+            aktaceraikematian_url = fs.url(aktaceraikematian_filename)
+        else:
+            aktaceraikematian_url = None
+
+        # Menyimpan data SuketPindahNikah
         SuketPindahNikah.objects.create(
             penulis=request.user,
             nama1=request.POST.get("inputNama1"),
@@ -1198,54 +2333,85 @@ def suketpindahnikah(request):
             jenis_kelamin2=request.POST.get("inputJenisKelamin2"),
             agama2=request.POST.get("inputAgama2"),
             pekerjaan2=request.POST.get("inputPekerjaan2"),
-            alamat2=request.POST.get("inputAlamat2")
+            alamat2=request.POST.get("inputAlamat2"),
+            pengantarrt=pengantarrt_url,
+            scankksuami=scankksuami_url,
+            scankkistri=scankkistri_url,
+            scanktpsuami=scanktpsuami_url,
+            scanktpistri=scanktpistri_url,
+            fotogandeng=fotogandeng_url,
+            aktaceraikematian=aktaceraikematian_url,
         )
     
         return redirect('suketpindahnikah')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Pindah Nikah
+@login_required
 def edit_suketpindahnikah(request, id):
     template_name = "backend/suketpindahnikah.html"
     
     suket_id = SuketPindahNikah.objects.get(id=id)
     
     if request.method == "POST":
-        # Mengambil input data dari form
-        penulis = request.user
-        nama1 = request.POST.get("inputNama1")
-        ttl1 = request.POST.get("inputTtl1")
-        jenis_kelamin1 = request.POST.get("inputJenisKelamin1")
-        agama1 = request.POST.get("inputAgama1")
-        pekerjaan1 = request.POST.get("inputPekerjaan1")
-        alamat1 = request.POST.get("inputAlamat1")
-        nama2 = request.POST.get("inputNama2")
-        ttl2 = request.POST.get("inputTtl2")
-        jenis_kelamin2 = request.POST.get("inputJenisKelamin2")
-        agama2 = request.POST.get("inputAgama2")
-        pekerjaan2 = request.POST.get("inputPekerjaan2")
-        alamat2 = request.POST.get("inputAlamat2")
-        
-        # Update data di objek suket_id
-        suket_id.penulis = penulis
-        suket_id.nama1 = nama1
-        suket_id.ttl1 = ttl1
-        suket_id.jenis_kelamin1 = jenis_kelamin1
-        suket_id.agama1 = agama1
-        suket_id.pekerjaan1 = pekerjaan1
-        suket_id.alamat1 = alamat1  
-        suket_id.nama2 = nama2
-        suket_id.ttl2 = ttl2
-        suket_id.jenis_kelamin2 = jenis_kelamin2
-        suket_id.agama2 = agama2
-        suket_id.pekerjaan2 = pekerjaan2
-        suket_id.alamat2 = alamat2
+        fs = FileSystemStorage()
+
+        pengantarrt_file = request.FILES.get("pengantarrt")
+        if pengantarrt_file:
+            pengantarrt_filename = fs.save(pengantarrt_file.name, pengantarrt_file)
+            suket_id.pengantarrt = fs.url(pengantarrt_filename)
+
+        scankksuami_file = request.FILES.get("scankksuami")
+        if scankksuami_file:
+            scankksuami_filename = fs.save(scankksuami_file.name, scankksuami_file)
+            suket_id.scankksuami = fs.url(scankksuami_filename)
+
+        scankkistri_file = request.FILES.get("scankkistri")
+        if scankkistri_file:
+            scankkistri_filename = fs.save(scankkistri_file.name, scankkistri_file)
+            suket_id.scankkistri = fs.url(scankkistri_filename)
+
+        scanktpsuami_file = request.FILES.get("scanktpsuami")
+        if scanktpsuami_file:
+            scanktpsuami_filename = fs.save(scanktpsuami_file.name, scanktpsuami_file)
+            suket_id.scanktpsuami = fs.url(scanktpsuami_filename)
+
+        scanktpistri_file = request.FILES.get("scanktpistri")
+        if scanktpistri_file:
+            scanktpistri_filename = fs.save(scanktpistri_file.name, scanktpistri_file)
+            suket_id.scanktpistri = fs.url(scanktpistri_filename)
+
+        fotogandeng_file = request.FILES.get("fotogandeng")
+        if fotogandeng_file:
+            fotogandeng_filename = fs.save(fotogandeng_file.name, fotogandeng_file)
+            suket_id.fotogandeng = fs.url(fotogandeng_filename)
+
+        aktaceraikematian_file = request.FILES.get("aktaceraikematian")
+        if aktaceraikematian_file:
+            aktaceraikematian_filename = fs.save(aktaceraikematian_file.name, aktaceraikematian_file)
+            suket_id.aktaceraikematian = fs.url(aktaceraikematian_filename)
+
+        # Mengupdate data lainnya
+        suket_id.penulis = request.user
+        suket_id.nama1 = request.POST.get("inputNama1")
+        suket_id.ttl1 = request.POST.get("inputTtl1")
+        suket_id.jenis_kelamin1 = request.POST.get("inputJenisKelamin1")
+        suket_id.agama1 = request.POST.get("inputAgama1")
+        suket_id.pekerjaan1 = request.POST.get("inputPekerjaan1")
+        suket_id.alamat1 = request.POST.get("inputAlamat1")
+        suket_id.nama2 = request.POST.get("inputNama2")
+        suket_id.ttl2 = request.POST.get("inputTtl2")
+        suket_id.jenis_kelamin2 = request.POST.get("inputJenisKelamin2")
+        suket_id.agama2 = request.POST.get("inputAgama2")
+        suket_id.pekerjaan2 = request.POST.get("inputPekerjaan2")
+        suket_id.alamat2 = request.POST.get("inputAlamat2")
         suket_id.date = timezone.now()
+        suket_id.status = 'review'
 
         suket_id.save()
         
@@ -1257,15 +2423,73 @@ def edit_suketpindahnikah(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Pindah Nikah
+@login_required
+def setujui_suketpindahnikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPindahNikah, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketpindahnikah')  # Redirect ke halaman list Suket Pindah Nikah
+
+@login_required
+def tolak_suketpindahnikah(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketPindahNikah, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketpindahnikah')  # Redirect ke halaman list Suket Pindah Nikah
+
+@login_required
 def delete_suketpindahnikah(request, id):
     SuketPindahNikah.objects.get(id=id).delete()
     return redirect('suketpindahnikah')
 
+@login_required
+def print_suketpindahnikah(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-keterangan-pindah-nikah.html"
+    surat = get_object_or_404(SuketPindahNikah, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+    'nama1': surat.nama1,
+    'ttl1': surat.ttl1,
+    'jenis_kelamin1': surat.jenis_kelamin1,
+    'agama1': surat.agama1,
+    'pekerjaan1': surat.pekerjaan1,
+    'alamat1': surat.alamat1,
+    'nama2': surat.nama2,
+    'ttl2': surat.ttl2,
+    'jenis_kelamin2': surat.jenis_kelamin2,
+    'agama2': surat.agama2,
+    'pekerjaan2': surat.pekerjaan2,
+    'alamat2': surat.alamat2,
+    'date': surat.date,
+}
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketpindahnikah(request, id):
+    template_name = "backend/detail_suketpindahnikah.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketPindahNikah berdasarkan ID
+    suket = get_object_or_404(SuketPindahNikah, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def suketrekkeltani(request):
     template_name = "backend/suketrekkeltani.html"
     
     suket = SuketRekKelTani.objects.all()
+    private = SuketRekKelTani.objects.filter(penulis=request.user)
     
     if request.method == "POST":
         # Membuat objek SuketRekKelTani baru
@@ -1282,12 +2506,13 @@ def suketrekkeltani(request):
         return redirect('suketrekkeltani')
     
     context = {
-        "suket": suket
+        "suket": suket,
+        'private':private
     }
     
     return render(request, template_name, context)
 
-# View untuk mengedit data Suket Rekomendasi Kelompok Tani
+@login_required
 def edit_suketrekkeltani(request, id):
     template_name = "backend/suketrekkeltani.html"
     
@@ -1312,6 +2537,7 @@ def edit_suketrekkeltani(request, id):
         suket_id.bantuan = bantuan
         suket_id.tujuan = tujuan
         suket_id.date = timezone.now()
+        suket_id.status='review'
 
         suket_id.save()
         
@@ -1323,11 +2549,62 @@ def edit_suketrekkeltani(request, id):
     
     return render(request, template_name, context)
 
-# View untuk menghapus data Suket Rekomendasi Kelompok Tani
+@login_required
+def setujui_suketrekeltani(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketRekKelTani, id=id)
+        suket.status = 'approved'  # Mengubah status menjadi Disetujui
+        suket.save()
+    return redirect('suketrekkeltani')  # Redirect ke halaman list Suket Rek Kel Tani
+
+@login_required
+def tolak_suketrekeltani(request, id):
+    if request.user.is_superuser:
+        suket = get_object_or_404(SuketRekKelTani, id=id)
+        suket.status = 'rejected'  # Mengubah status menjadi Ditolak
+        suket.save()
+    return redirect('suketrekkeltani')  # Redirect ke halaman list Suket Rek Kel Tani
+
+@login_required
 def delete_suketrekkeltani(request, id):
     SuketRekKelTani.objects.get(id=id).delete()
     return redirect('suketrekkeltani')
 
+@login_required
+def print_suketrekkeltani(request, id):
+    # Mengambil data surat
+    
+    template_name= "surat/surat-rekomendasi-kelompok-tani.html"
+    surat = get_object_or_404(SuketRekKelTani, id=id)
+
+    # Mengisi template dengan data surat
+    context = {
+    'nama': surat.nama,
+    'jabatan': surat.jabatan,
+    'sekretariat': surat.sekretariat,
+    'tempat': surat.tempat,
+    'bantuan': surat.bantuan,
+    'tujuan': surat.tujuan,
+    'date': surat.date,
+}
+    
+    return render(request,template_name, context)
+
+@login_required
+def detail_suketrekkeltani(request, id):
+    template_name = "backend/detail_suketrekkeltani.html"  # Template untuk halaman detail
+    
+    # Mengambil objek SuketRekKelTani berdasarkan ID
+    suket = get_object_or_404(SuketRekKelTani, id=id)
+    
+    # Mengirim data ke template
+    context = {
+        'suket': suket,
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
 def pengumuman(request):
     template_name = "backend/pengumuman.html"
     
@@ -1363,6 +2640,7 @@ def pengumuman(request):
     
     return render(request, template_name, context)
 
+@login_required
 def edit_pengumuman(request, id):
     template_name = "backend/pengumuman.html"
     
@@ -1396,6 +2674,307 @@ def edit_pengumuman(request, id):
     
     return render(request, template_name, context)
 
+@login_required
 def delete_pengumuman(request, id):
     Pengumuman.objects.get(id=id).delete()
     return redirect('pengumuman')  # Redirect ke halaman pengumuman (sesuaikan dengan rute yang kamu inginkan)
+
+
+@login_required    
+def blog(request):
+    template_name = "backend/blog.html"
+    
+    blg = Blog.objects.all()
+    
+    if request.method == 'POST':
+        judul = request.POST.get("inputJudul")
+        konten = request.POST.get("inputKonten")
+        picture = request.FILES.get("inputGambar")
+        
+        
+        fs = FileSystemStorage()
+
+        # Jika ada file pengantar RT yang di-upload
+        if picture:
+            filename_pengantar = fs.save(picture.name, picture)
+            url_pengantar = fs.url(filename_pengantar)
+        else:
+            url_pengantar = None
+            
+        Blog.objects.create(
+            penulis = request.user,
+            judul=judul,
+            konten=konten,
+            picture=url_pengantar
+        )
+        
+        return redirect('blog')
+        
+    context = {
+        "blg" : blg
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
+def edit_blog(request, id):
+    template_name = "backend/blog.html"
+    
+    blog_id = Blog.objects.get(id=id)
+    
+    if request.method == "POST":
+        # Mengambil input data dari form
+        judul = request.POST.get("inputJudul")
+        konten = request.POST.get("inputKonten")
+        picture = request.FILES.get("inputGambar")
+        
+        fs = FileSystemStorage()
+
+        # Jika ada file gambar baru yang di-upload
+        if picture:
+            filename_pengantar = fs.save(picture.name, picture)
+            blog_id.picture = fs.url(filename_pengantar)
+        
+        # Update data di objek pengumuman
+        blog_id.judul = judul
+        blog_id.konten = konten
+        blog_id.date = timezone.now()
+
+        blog_id.save()
+        
+        return redirect('blog')  # Redirect ke halaman pengumuman (sesuaikan dengan rute yang kamu inginkan)
+    
+    context = {
+        "value": blog_id
+    }
+    
+    return render(request, template_name, context)
+
+@login_required
+def delete_blog(request, id):
+    Blog.objects.get(id=id).delete()
+    return redirect('blog')  # Redirect ke halaman pengumuman (sesuaikan dengan rute yang kamu inginkan)
+
+@login_required
+def detail_blog(request, id):
+    template_name = "backend/detailblog.html"
+    
+    blg = Blog.objects.get(id=id)
+    
+    context = {
+        "blg" : blg
+    }
+    
+    return render (request, template_name, context)
+
+@login_required
+def logoutPage(request):
+    logout(request)
+    return redirect('welcome')
+
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        password = request.POST['password']
+        password2 = request.POST['password2']
+        nik = request.POST['nik']
+        ktp = request.FILES['ktp']
+
+        # Validasi password
+        if password != password2:
+            return render(request, 'backend/register.html', {'error': 'Passwords do not match'})
+        
+          # Validasi apakah NIK sudah ada di database
+        if Profile.objects.filter(nik=nik).exists():
+            return render(request, 'backend/register.html', {'error': 'NIK already exists'})
+
+        # Validasi apakah username sudah ada di database
+        if User.objects.filter(username=username).exists():
+            return render(request, 'backend/register.html', {'error': 'Username already exists'})
+        
+        # Buat user baru
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password
+        )
+
+        # Simpan KTP
+        fs = FileSystemStorage()
+        filename = fs.save(ktp.name, ktp)
+        ktp_url = fs.url(filename)
+
+        # Update profil pengguna dengan NIK dan KTP
+        user.profile.nik = nik
+        user.profile.ktp = ktp_url
+        user.profile.save()
+
+        # Login otomatis setelah registrasi
+        login(request, user)
+
+        return redirect('dashboard')  # Redirect ke halaman utama setelah registrasi
+
+    return render(request, 'backend/register.html')
+
+@login_required
+def profile(request):
+    template_name = "backend/profile.html"
+     # Ambil user yang sedang login
+    user = request.user
+
+    # Ambil profil terkait user
+    profile = Profile.objects.get(user=user)
+    
+    context = {
+        "user":user,
+        "profile" : profile,
+    }
+    
+    
+    return render(request,template_name, context)
+
+@login_required
+def daftaruser(request):
+    template_name = "backend/daftaruser.html"
+   
+    profile = Profile.objects.all()
+    
+    context = {
+        "profile":profile,
+     
+    }
+    return render(request,template_name, context)
+
+@login_required
+def detailuser(request,id):
+    template_name = "backend/detailuser.html"
+   
+    user = get_object_or_404(User, id=id)
+    profile = user.profile
+    
+    context = {
+        "profile":profile,
+     
+    }
+    
+    return render(request,template_name, context)
+
+@login_required
+def hapususers(request, id):
+    user = get_object_or_404(User, id=id)
+    user.delete()
+    return redirect(daftaruser)
+
+@login_required
+def edituser(request, id):
+    # Mengambil objek user dan profil berdasarkan ID
+    user = get_object_or_404(User, id=id)
+    profile = user.profile
+
+    if request.method == 'POST':
+        # Mengambil data dari form
+        username = request.POST['username']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        nik = request.POST['nik']
+
+        # Mengambil file KTP yang diupload (jika ada)
+        if 'ktp' in request.FILES:
+            ktp = request.FILES['ktp']
+            fs = FileSystemStorage()
+            filename = fs.save(ktp.name, ktp)
+            ktp_url = fs.url(filename)
+            profile.ktp = ktp_url  # Update KTP jika ada
+
+        # Update data user
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update data profil
+        profile.nik = nik
+        profile.save()
+
+        # Redirect setelah penyimpanan
+        return redirect('daftar_user')  # Redirect ke halaman detail user setelah update
+
+    # Jika requestnya GET, tampilkan form dengan data user yang sudah ada
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+    return render(request, 'backend/edituser.html', context)
+
+@login_required
+def datapengaduanasing(request):
+    template_name = "backend/pengaduanasing.html"
+   
+    aduan = PengaduanAsing.objects.all()
+    
+    context = {
+        "aduans":aduan,
+     
+    }
+    return render(request,template_name, context)
+
+@login_required
+def detailpengaduanasing(request,id):
+    template_name = "backend/detailpengaduanasing.html"
+   
+    aduan = PengaduanAsing.objects.get(id=id)
+    
+    context = {
+        "aduans":aduan,
+     
+    }
+    return render(request,template_name, context)
+
+@login_required
+def deletepengaduanasing(request,id):
+    datas = PengaduanAsing.objects.get(id=id)
+    datas.delete()
+    return redirect(datapengaduanasing)
+
+@login_required
+def register_super_admin(request):
+    if request.method == 'POST':
+        # Ambil data dari form POST
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        # Validasi password cocok
+        if password1 != password2:
+            return render(request, 'backend/register_super_admin.html', {
+                'error': 'Passwords do not match'
+            })
+
+        # Cek apakah username sudah ada
+        if User.objects.filter(username=username).exists():
+            return render(request, 'backend/register_super_admin.html', {
+                'error': 'Username already exists'
+            })
+
+        # Membuat super admin baru
+        user = User.objects.create_user(username=username, email=email, password=password1)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.is_superuser = True  # Beri hak akses superuser
+        user.is_staff = True  # Beri akses admin dashboard
+        user.save()
+
+        return redirect('dashboard')  # Redirect setelah registrasi berhasil
+
+    return render(request, 'backend/register_super_admin.html')

@@ -1,4 +1,4 @@
-{% load static %} {% load livereload_tags %}
+{% load static %} {% load custom_filters %} {% load livereload_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,19 +18,17 @@
 
   <body>
     <header class="jumbtron body-content" id="home">
-      <nav
-        class="navbar navbar-expand-lg container-fluid "
-        id="navbar"
-       
-      >
-        <div class="container-fluid ">
-          <div >
-            <img
-              class="logo-kecil"
-              src="{% static 'frontend/gambar/logokukar.png' %}"
-              alt="logo-kukar"
-            />
-            <span class="text-light fw-bold ms-3 fs-4"> Kerta Buana </span>
+      <nav class="navbar navbar-expand-lg container-fluid" id="navbar">
+        <div class="container-fluid">
+          <div>
+            <a href="{% url 'welcome' %}" class="text-decoration-none">
+              <img
+                class="logo-kecil"
+                src="{% static 'frontend/gambar/logokukar.png' %}"
+                alt="logo-kukar"
+              />
+              <span class="text-light fw-bold ms-3 fs-4"> Kerta Buana </span>
+            </a>
           </div>
           <button
             class="navbar-toggler bg-light"
@@ -63,6 +61,13 @@
               <li class="nav-item me-md-3">
                 <a
                   class="nav-link active text-light fs-6 fw-bold"
+                  href="{% url 'blog-h' %}"
+                  >Berita Desa</a
+                >
+              </li>
+              <li class="nav-item me-md-3">
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
                   href="#profile"
                   >Profile</a
                 >
@@ -74,13 +79,24 @@
                   >Kontak</a
                 >
               </li>
+              {% if user.is_authenticated %}
               <li class="nav-item">
                 <a
                   class="nav-link active text-light fs-6 fw-bold"
-                  href="{% url 'dashboard' %}"
+                  href="{% url 'loginpage' %}"
+                  >{{request.user.username}}</a
+                >
+              </li>
+              {% else %}
+              <li class="nav-item">
+                <a
+                  class="nav-link active text-light fs-6 fw-bold"
+                  href="{% url 'loginpage' %}"
                   >Login</a
                 >
               </li>
+
+              {% endif %}
             </ul>
           </div>
         </div>
@@ -101,209 +117,282 @@
             <div class="row row-cols-lg-8 g-3">
               <!-- Card 1 -->
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketpermohonanktp' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/ktp.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/ktp.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">Surat pengantar ktp</p>
+                      <p class="card-text fw-bold w-small">
+                        Surat pengantar ktp
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
+              </div>
+
+              <div class="col">
+                <a
+                  href="{% url 'suketbelummenikah' %}"
+                  class="text-decoration-none"
+                >
+                  <div
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
+                  >
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/menikah.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
+
+                      <p class="card-text fw-bold w-small">
+                        Suket. Belum Menikah
+                      </p>
+                    </div>
+                  </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'sukettidakmampu' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/smiley.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/miskin.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">
-                      Surat Berkelakuan Baik
-                    </p>
+                      <p class="card-text fw-bold w-small">
+                        Suket. Tidak Mampu
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a href="{% url 'skck' %}" class="text-decoration-none">
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/menikah.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/police.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">
-                      Suket. Belum Menikah
-                    </p>
+                      <p class="card-text fw-bold w-small">SKCK</p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketktpbedanama' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/miskin.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/ktp-beda.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">Suket. Tidak Mampu</p>
+                      <p class="card-text fw-bold w-small">
+                        Suket. KTP Beda Nama
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketahliwaris' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/police.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/uang.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">SKCK</p>
+                      <p class="card-text fw-bold w-small">Suket. Ahli Waris</p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a href="{% url 'suketMTQ' %}" class="text-decoration-none">
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/ktp-beda.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/al-quran.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">
-                      Suket. KTP Beda Nama
-                    </p>
+                      <p class="card-text fw-bold w-small">
+                        Suket. Domisili MTQ
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketkehilangan' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/uang.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/thief.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">Suket. Ahli Waris</p>
+                      <p class="card-text fw-bold w-small">
+                        Suket. Kehilangan Barang
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketkelahiran' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/al-quran.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/lahir.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">Suket. Domisili MTQ</p>
+                      <p class="card-text fw-bold w-small">Suket. Kelahiran</p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+                <a
+                  href="{% url 'suketkematian' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 9rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/thief.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/mati.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">
-                      Suket. Kehilangan Barang
-                    </p>
+                      <p class="card-text fw-bold w-small">Suket. Kematian</p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
-              <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+              <div class="col-2">
+                <a
+                  href="{% url 'suketpenghasilantidaktetap' %}"
+                  class="text-decoration-none"
+                >
                   <div
-                    class="card-body d-flex flex-column justify-content-center"
+                    class="card rounded-4"
+                    style="width: 12rem; height: 10rem"
                   >
-                    <img
-                      src="{% static 'frontend/gambar/lahir.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
+                    <div
+                      class="card-body d-flex flex-column justify-content-center"
+                    >
+                      <img
+                        src="{% static 'frontend/gambar/penghasilan.svg' %}"
+                        style="width: 60px"
+                        class="mx-auto"
+                        alt=""
+                      />
 
-                    <p class="card-text fw-bold w-small">Suket. Kelahiran</p>
+                      <p class="card-text fw-bold w-small">
+                        Suket. Penghasilan Tidak Tetap
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </a>
               </div>
-              <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
-                  <div
-                    class="card-body d-flex flex-column justify-content-center"
-                  >
-                    <img
-                      src="{% static 'frontend/gambar/mati.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
-
-                    <p class="card-text fw-bold w-small">Suket. Kematian</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
-                  <div
-                    class="card-body d-flex flex-column justify-content-center"
-                  >
-                    <img
-                      src="{% static 'frontend/gambar/penghasilan.svg' %}"
-                      style="width: 60px"
-                      class="mx-auto"
-                      alt=""
-                    />
-
-                    <p class="card-text fw-bold w-small">
-                      Suket. Penghasilan Tidak Tetap
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+              <div class="col-2">
+                <a  href="{% url 'suketusaha' %}"
+                class="text-decoration-none">
+                <div class="card rounded-4" style="width: 12rem; height: 10rem">
                   <div
                     class="card-body d-flex flex-column justify-content-center"
                   >
@@ -317,9 +406,11 @@
                     <p class="card-text fw-bold w-small">Suket. Usaha</p>
                   </div>
                 </div>
+              </a>
               </div>
-              <div class="col">
-                <div class="card rounded-4" style="width: 9rem; height: 10rem">
+              <div class="col-2">
+                <a href="{% url 'suketvaksinnikah' %}" class="text-decoration-none">
+                <div class="card rounded-4" style="width: 12rem; height: 10rem">
                   <div
                     class="card-body d-flex flex-column justify-content-center"
                   >
@@ -333,8 +424,10 @@
                     <p class="card-text fw-bold w-small">Suket. Vaksin Nikah</p>
                   </div>
                 </div>
+              </a>
               </div>
               <div class="col">
+                <a href="{% url 'suketpindahnikah' %}" class="text-decoration-none">
                 <div class="card rounded-4" style="width: 9rem; height: 10rem">
                   <div
                     class="card-body d-flex flex-column justify-content-center"
@@ -349,8 +442,10 @@
                     <p class="card-text fw-bold w-small">Suket. Pindah Nikah</p>
                   </div>
                 </div>
+              </a>
               </div>
               <div class="col">
+                <a href="{% url 'suketrekkeltani' %}" class="text-decoration-none">
                 <div class="card rounded-4" style="width: 9rem; height: 10rem">
                   <div
                     class="card-body d-flex flex-column justify-content-center"
@@ -367,40 +462,30 @@
                     </p>
                   </div>
                 </div>
+              </a>
               </div>
             </div>
           </div>
           <!-- Select Element (visible on tablet and smaller) -->
           <div class="select-container container-fluid my-5">
-            <label for="surat-select" class="form-label text-light"
-              >Pilih Suratmu:</label
-            >
-            <select
-              class="form-select"
-              id="surat-select"
-              onchange="navigateToPage()"
-            >
+            <label for="surat-select" class="form-label text-light">Pilih Suratmu:</label>
+            <select class="form-select" id="surat-select" onchange="navigateToPage()">
               <option value="">Pilih Surat</option>
-              <option value="surat-ktp">Surat Pengantar KTP</option>
-              <option value="surat-baik">Surat Berkelakuan Baik</option>
-              <option value="surat-menikah">Suket. Belum Menikah</option>
-              <option value="surat-mampu">Suket. Tidak Mampu</option>
-              <option value="surat-skck">SKCK</option>
-              <option value="ktp-beda">Suket. KTP Beda Nama</option>
-              <option value="ahli-waris">Suket. Ahli Waris</option>
-              <option value="domisili-mtq">Suket. Domisili MTQ</option>
-              <option value="kehilangan-barang">
-                Suket. Kehilangan Barang
-              </option>
-              <option value="kelahiran">Suket. Kelahiran</option>
-              <option value="kematian">Suket. Kematian</option>
-              <option value="penghasilan-tidak-tetap">
-                Suket. Penghasilan Tidak Tetap
-              </option>
-              <option value="usaha">Suket. Usaha</option>
-              <option value="vaksin-nikah">Suket. Vaksin Nikah</option>
-              <option value="pindah-nikah">Suket. Pindah Nikah</option>
-              <option value="kelompok-tani">Suket. Kelompok Tani</option>
+              <option value="{% url 'suketpermohonanktp' %}">Surat Pengantar KTP</option>
+              <option value="{% url 'suketbelummenikah' %}">Suket. Belum Menikah</option>
+              <option value="{% url 'sukettidakmampu' %}">Suket. Tidak Mampu</option>
+              <option value="{% url 'skck' %}">SKCK</option>
+              <option value="{% url 'suketktpbedanama' %}">Suket. KTP Beda Nama</option>
+              <option value="{% url 'suketahliwaris' %}">Suket. Ahli Waris</option>
+              <option value="{% url 'suketMTQ' %}">Suket. Domisili MTQ</option>
+              <option value="{% url 'suketkehilangan' %}">Suket. Kehilangan Barang</option>
+              <option value="{% url 'suketkelahiran' %}">Suket. Kelahiran</option>
+              <option value="{% url 'suketkematian' %}">Suket. Kematian</option>
+              <option value="{% url 'suketpenghasilantidaktetap' %}">Suket. Penghasilan Tidak Tetap</option>
+              <option value="{% url 'suketusaha' %}">Suket. Usaha</option>
+              <option value="{% url 'suketvaksinnikah' %}">Suket. Vaksin Nikah</option>
+              <option value="{% url 'suketpindahnikah' %}">Suket. Pindah Nikah</option>
+              <option value="{% url 'suketrekkeltani' %}">Suket. Kelompok Tani</option>
             </select>
           </div>
         </div>
@@ -415,50 +500,33 @@
           PENGUMUMAN TERBARU DESA
         </h1>
         <div class="row g-4">
-          <!-- Card 1 -->
+          {% for pengumuman in annc %}
           <div class="col-sm-6 col-lg-3">
-            <div class="card shadow-green h-100 rounded-4 py-4">
-              <div class="card-body text-center">
-                <h2 class="card-title fw-bold">17 Agustus</h2>
-                <p class="card-text">
-                  Desa akan mengadakan lomba di aula desa Kerta Buana
-                </p>
+            <a
+              href="{% url 'detail_pengumuman' pengumuman.id %}"
+              class="text-decoration-none"
+            >
+              <div class="card shadow-green h-100 rounded-4 py-4">
+                <div class="card-body text-center">
+                  <!-- Judul Pengumuman -->
+                  <h2 class="card-title fw-bold">{{ pengumuman.judul }}</h2>
+                  <!-- Konten Pengumuman -->
+                  <div
+                    style="
+                      display: -webkit-box;
+                      -webkit-line-clamp: 3;
+                      line-clamp: 3;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                    "
+                  >
+                    <p class="card-text">{{ pengumuman.konten|striptags }}</p>
+                  </div>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
-          <!-- Card 2 -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="card shadow-green h-100 rounded-4 py-4">
-              <div class="card-body text-center">
-                <h2 class="card-title fw-bold">17 Agustus</h2>
-                <p class="card-text">
-                  Desa akan mengadakan lomba di aula desa Kerta Buana
-                </p>
-              </div>
-            </div>
-          </div>
-          <!-- Card 3 -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="card shadow-green h-100 rounded-4 py-4">
-              <div class="card-body text-center">
-                <h2 class="card-title fw-bold">17 Agustus</h2>
-                <p class="card-text">
-                  Desa akan mengadakan lomba di aula desa Kerta Buana
-                </p>
-              </div>
-            </div>
-          </div>
-          <!-- Card 4 -->
-          <div class="col-sm-6 col-lg-3">
-            <div class="card shadow-green h-100 rounded-4 py-4">
-              <div class="card-body text-center">
-                <h2 class="card-title fw-bold">17 Agustus</h2>
-                <p class="card-text">
-                  Desa akan mengadakan lomba di aula desa Kerta Buana
-                </p>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </section>
       <section
@@ -677,7 +745,8 @@
                 <h2 class="text-success mb-4 fw-bold display-6">
                   Area Pengaduan
                 </h2>
-                <form>
+                <form method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
                   <div class="mb-3">
                     <input
                       type="text"
@@ -700,6 +769,18 @@
                       name="phone"
                       class="form-control form-control-lg rounded-pill"
                       placeholder="Phone"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="ktp" class="form-label fw-bold"
+                      >Upload Scan KTP</label
+                    >
+                    <input
+                      type="file"
+                      name="ktp"
+                      class="form-control form-control-lg rounded-pill"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      placeholder="Upload KTP"
                     />
                   </div>
                   <div class="mb-3">
@@ -824,6 +905,15 @@
           navbar.classList.remove("scrolled");
         }
       });
+    </script>
+    <script>
+      function navigateToPage() {
+        const select = document.getElementById("surat-select");
+        const selectedValue = select.value;
+        if (selectedValue) {
+          window.location.href = selectedValue;
+        }
+      }
     </script>
   </body>
 </html>

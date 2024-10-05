@@ -1,4 +1,4 @@
-{% extends "backend/base_ui.html" %} {% load static %} {% block konten %}
+{% extends "backend/base_ui.html" %} {% load static %} {% load custom_filters %} {% block konten %}
 
 <div class="card">
   <div class="card-body">
@@ -9,7 +9,7 @@
         <h1>Pengumuman</h1>
         <nav>
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
             <li class="breadcrumb-item active">Pengumuman</li>
           </ol>
         </nav>
@@ -51,12 +51,10 @@
                   type="file"
                   id="formFile"
                   name="inputGambar"
-                  
                 />
               </div>
             </div>
             <div class="row mb-3">
-              
               <div class="col-sm-10 gap-5">
                 <a href="{% url 'pengumuman' %}">
                   <button class="btn btn-secondary">Cancel</button>
@@ -78,91 +76,93 @@
             data-bs-toggle="modal"
             data-bs-target="#formModal"
           >
-            Tambahkan surat
+            Tambahkan pengumuman
           </button>
         </div>
-        <table class="table datatable">
-          <thead>
-            <tr>
-              <th>Judul</th>
-              <th>Konten</th>
-              <th class="text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for pengumuman in annc %}
+        <div class="table-responsive">
+          <table class="table datatable">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Konten</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pengumuman in annc %}
 
-            <tr>
-              <td>
-                <div
-                  style="
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 1;
-                    line-clamp: 1;
-                    overflow: hidden;
-                    overflow-wrap: break-word;
-                    word-wrap: break-word;
-                    hyphens: auto;
-                    max-width: 200px;
-                  "
-                >
-                  <p>{{ pengumuman.judul }}</p>
-                </div>
-              </td>
-              <td>
-                <div
-                  style="
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 1;
-                    line-clamp: 1;
-                    overflow: hidden;
-                    overflow-wrap: break-word;
-                    word-wrap: break-word;
-                    hyphens: auto;
-                    max-width: 200px;
-                  "
-                >
-                  <p>{{ pengumuman.konten | safe }}</p>
-                </div>
-              </td>
+              <tr>
+                <td>
+                  <div
+                    style="
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                      -webkit-line-clamp: 1;
+                      line-clamp: 1;
+                      overflow: hidden;
+                      overflow-wrap: break-word;
+                      word-wrap: break-word;
+                      hyphens: auto;
+                      max-width: 200px;
+                    "
+                  >
+                    <p>{{ pengumuman.judul }}</p>
+                  </div>
+                </td>
+                <td>
+                  <div
+                    style="
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                      -webkit-line-clamp: 1;
+                      line-clamp: 1;
+                      overflow: hidden;
+                      overflow-wrap: break-word;
+                      word-wrap: break-word;
+                      hyphens: auto;
+                      max-width: 200px;
+                    "
+                  >
+                    <p>{{ pengumuman.konten|striptags }}</p>
+                  </div>
+                </td>
 
-              <td class="text-center">
-                <!-- Btn-group untuk aksi -->
-                <div
-                  class="btn-group gap-3"
-                  role="group"
-                  aria-label="Action buttons"
-                >
-                  <a
-                    href="{% url 'edit_pengumuman' pengumuman.id %}"
-                    class="text-decoration-none"
+                <td class="text-center">
+                  <!-- Btn-group untuk aksi -->
+                  <div
+                    class="btn-group gap-3"
+                    role="group"
+                    aria-label="Action buttons"
                   >
-                    <button
-                      type="button"
-                      class="btn btn-warning btn-sm rounded-3"
+                    <a
+                      href="{% url 'edit_pengumuman' pengumuman.id %}"
+                      class="text-decoration-none"
                     >
-                      Edit
-                    </button>
-                  </a>
-                  <a
-                    href="{% url 'delete_pengumuman' pengumuman.id %}"
-                    class="text-decoration-none"
-                  >
-                    <button
-                      type="button"
-                      class="btn btn-danger btn-sm rounded-3"
+                      <button
+                        type="button"
+                        class="btn btn-warning btn-sm rounded-3"
+                      >
+                        Edit
+                      </button>
+                    </a>
+                    <a
+                      href="{% url 'delete_pengumuman' pengumuman.id %}"
+                      class="text-decoration-none"
                     >
-                      Delete
-                    </button>
-                  </a>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm rounded-3"
+                      >
+                        Delete
+                      </button>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
       {% endif %}
 

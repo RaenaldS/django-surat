@@ -2,13 +2,18 @@ from django.contrib import admin
 from .models import *
 # Register your models here.
 
+
+class AdSuketPermohonanKTP(admin.ModelAdmin):
+    list_display = ["penulis",'nama', 'nokk', 'nik', 'alamat', 'date', 'status', 'pengantarrt', 'scankk', 'scanijasahakta']  # Menampilkan kolom yang relevan di halaman admin
+    
+admin.site.register(SuketPermohonanKTP, AdSuketPermohonanKTP)
 class AdSuketBelumMenikah(admin.ModelAdmin):
     list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "date", "status"]
 
 admin.site.register(SuketBelumMenikah, AdSuketBelumMenikah)
 
 class AdSuketTidakMampu(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan","scankk", "pengantarrt", "date", "status"]
 
 admin.site.register(SuketTidakMampu, AdSuketTidakMampu)
 
@@ -23,7 +28,7 @@ class AdSuketKTPBedaNama(admin.ModelAdmin):
 admin.site.register(SuketKTPBedaNama, AdSuketKTPBedaNama)
 
 class AdSuketAhliWaris(admin.ModelAdmin):
-    list_display = ["penulis", "nama1", "ttl1", "alamat1", "nama2", "ttl2", "alamat2", "nama3", "ttl3", "alamat3","nama4", "ttl4", "alamat4", "date", "status"]
+    list_display = ["penulis", "nama1", "ttl1", "alamat1", "nama2", "ttl2", "alamat2", "nama3", "ttl3", "alamat3","nama4", "ttl4", "alamat4",'skkematian','scanktpkkahliwaris1','scanktpkkahliwaris2','scanktpkkahliwaris3','scanktpkkahliwaris4','scanktpsaksi1','scanktpsaksi2', "date", "status"]
 
 
 admin.site.register(SuketAhliWaris, AdSuketAhliWaris)
@@ -169,7 +174,14 @@ class AdSuketPindahNikah(admin.ModelAdmin):
             "jenis_kelamin2", 
             "ttl2", 
             "alamat2", 
-            "pekerjaan2", 
+            "pekerjaan2",
+            'pengantarrt',
+            'scankksuami',
+            'scankkistri',
+            'scanktpsuami',
+            'scanktpistri',
+            'fotogandeng',
+            'aktaceraikematian', 
             "date", 
             "status"
         ]
@@ -179,7 +191,20 @@ class AdSuketRekKelTani(admin.ModelAdmin):
     list_display = ["penulis", "nama", "jabatan", "sekretariat", "tempat", "bantuan", "tujuan", "date", "status"]
 admin.site.register(SuketRekKelTani, AdSuketRekKelTani)
 
-class Adpengumuman(admin.ModelAdmin):
+class AdPengumuman(admin.ModelAdmin):
     list_display = ["penulis", "judul", "konten", "date", "picture"]
     
-admin.site.register(Pengumuman, Adpengumuman)
+admin.site.register(Pengumuman, AdPengumuman)
+
+class AdBlog(admin.ModelAdmin):
+    list_display = ["penulis", "judul", "konten", "date", "picture"]
+    
+admin.site.register(Blog, AdBlog)
+
+class AdProfile(admin.ModelAdmin):
+    list_display = ["user", "nik", "ktp"]
+admin.site.register(Profile, AdProfile)
+
+class AdPengaduanAsing(admin.ModelAdmin):
+    list_display = ["name", "email", "phone", "message", "ktp"]
+admin.site.register(PengaduanAsing, AdPengaduanAsing)
