@@ -6,7 +6,9 @@
     <h1>Surat Keterangan Tidak Mampu</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard' %}">Home</a>
+        </li>
         <li class="breadcrumb-item active">Surat Keterangan Tidak Mampu</li>
       </ol>
     </nav>
@@ -62,6 +64,7 @@
               class="form-control"
               name="inputTtl"
               value="{{ value.ttl }}"
+              placeholder="contoh: Samarinda, 01 Januari 2020"
               required
             />
           </div>
@@ -128,6 +131,32 @@
               class="form-control"
               name="inputAlamat"
               value="{{ value.alamat }}"
+              required
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="inputAlamat" class="col-sm-2 col-form-label">Dusun</label>
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputDusun"
+              value="{{ value.dusun }}"
+              required
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="inputKeperluan" class="col-sm-2 col-form-label"
+            >Keperluan</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputKeperluan"
+              value="{{ value.keperluan}}"
               required
             />
           </div>
@@ -473,6 +502,7 @@
                       type="text"
                       class="form-control"
                       name="inputTtl"
+                      placeholder="contoh: Samarinda, 01 Januari 2020"
                       required
                     />
                   </div>
@@ -538,6 +568,32 @@
                       type="text"
                       class="form-control"
                       name="inputAlamat"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="inputAlamat" class="col-sm-2 col-form-label"
+                    >Dusun</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputDusun"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="inputKeperluan" class="col-sm-2 col-form-label"
+                    >Keperluan</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputKeperluan"
                       required
                     />
                   </div>

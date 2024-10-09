@@ -101,6 +101,7 @@
                     <th scope="col">Penulis</th>
                     <th scope="col">Date</th>
                     <th scope="col">Tipe Surat</th>
+                    <th scope="col">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -114,6 +115,13 @@
                     <td>{{ surat_info.surat.penulis.username }}</td>
                     <td>{{ surat_info.surat.date }}</td>
                     <td>{{ surat_info.type }}</td>
+                    {% if surat_info.surat.status == 'review' %}
+                    <td class="text-warning fw-bold">Proses Review</td>
+                    {% elif surat_info.surat.status == 'approved' %}
+                    <td class="text-success fw-bold">Disetujui</td>
+                    {% elif surat_info.surat.status == 'rejected' %}
+                    <td class="text-danger fw-bold">Ditolak</td>
+                    {% endif %}
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -159,8 +167,7 @@
                       type="button"
                       data-bs-toggle="collapse"
                     >
-                    Bagaimana jika suratku ditolak?
-                     
+                      Bagaimana jika suratku ditolak?
                     </button>
                   </h2>
                   <div
@@ -169,7 +176,6 @@
                     data-bs-parent="#faq-group-1"
                   >
                     <div class="accordion-body">
-                      
                       Silahkan lakukan edit/pengubahan isi surat sesuai dengan
                       ketentuan lalu konfirmasi ulang ke admin agar di setujui.
                     </div>
@@ -184,8 +190,8 @@
                       type="button"
                       data-bs-toggle="collapse"
                     >
-                    Apa yang harus dilakukan ketika salah memasukkan informasi
-                    akun?
+                      Apa yang harus dilakukan ketika salah memasukkan informasi
+                      akun?
                     </button>
                   </h2>
                   <div
@@ -199,8 +205,6 @@
                     </div>
                   </div>
                 </div>
-
-                
               </div>
             </div>
           </div>

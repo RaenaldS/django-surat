@@ -115,6 +115,8 @@ def dashboard(request):
     for surat in suket_rek_kel_tani:
         recent_surat.append({'surat': surat, 'type': 'Surat Rek Kel Tani'})
     
+    # Urutkan recent_surat berdasarkan tanggal surat
+    recent_surat = sorted(recent_surat, key=lambda x: x['surat'].date, reverse=True)
     
     context = {
         'total_users': total_users, 
@@ -290,6 +292,7 @@ def suketbelummenikah(request):
             agama=request.POST.get("inputAgama"),
             nik=request.POST.get("inputNIK"),
             alamat=request.POST.get("inputAlamat"),
+            persyaratan=request.POST.get("inputPersyaratan"),
             
         )
     
@@ -317,6 +320,7 @@ def edit_suketbelummenikah(request,id):
         agama=request.POST.get("inputAgama")
         nik=request.POST.get("inputNIK")
         alamat=request.POST.get("inputAlamat")
+        persyaratan=request.POST.get("inputPersyaratan")
         
         suket_id.penulis=penulis
         suket_id.nama=nama
@@ -326,6 +330,7 @@ def edit_suketbelummenikah(request,id):
         suket_id.agama=agama
         suket_id.nik=nik
         suket_id.alamat=alamat
+        suket_id.persyaratan=persyaratan
         suket_id.date=timezone.now()
         suket_id.status='review'
         
@@ -378,6 +383,7 @@ def print_suketbelummenikah(request, id):
         'agama': surat.agama,
         'nik': surat.nik,
         'alamat': surat.alamat,
+        'persyaratan': surat.persyaratan,
         'date': surat.date,
     }
     
@@ -434,6 +440,8 @@ def sukettidakmampu(request):
             nik=request.POST.get("inputNIK"),
             alamat=request.POST.get("inputAlamat"),
             pekerjaan= request.POST.get("inputPekerjaan"),
+            dusun = request.POST.get("inputDusun"),
+            keperluan= request.POST.get("inputKeperluan"),
             pengantarrt=pengantar_rt_url,
             scankk=scankk_url,
         )
@@ -479,6 +487,9 @@ def edit_sukettidakmampu(request,id):
         nik=request.POST.get("inputNIK")
         alamat=request.POST.get("inputAlamat")
         pekerjaan= request.POST.get("inputPekerjaan")
+        dusun= request.POST.get("inputDusun")
+        keperluan = request.POST.get("inputKeperluan")
+        
         
         suket_id.penulis=penulis
         suket_id.nama=nama
@@ -490,6 +501,8 @@ def edit_sukettidakmampu(request,id):
         suket_id.alamat=alamat
         suket_id.date=timezone.now()
         suket_id.pekerjaan= pekerjaan
+        suket_id.dusun = dusun
+        suket_id.keperluan= keperluan
         suket_id.status='review'
         
         suket_id.save()
@@ -541,6 +554,8 @@ def print_sukettidakmampu(request, id):
         'jenis_kelamin': surat.jenis_kelamin,
         'nik': surat.nik,
         'pekerjaan': surat.pekerjaan,
+        'dusun': surat.dusun,
+        'keperluan': surat.keperluan,
         'alamat': surat.alamat,
         'date': surat.date,
     }
@@ -588,6 +603,7 @@ def skck(request):
             pekerjaan= request.POST.get("inputPekerjaan"),
             kawin = request.POST.get("inputKawin"),
             pendidikanterakhir = request.POST.get("inputPendidikanterakhir"),
+            persyaratan = request.POST.get("inputPersyaratan"),
             scanktp = gambar,
         )
     
@@ -618,6 +634,7 @@ def edit_skck(request,id):
         pekerjaan= request.POST.get("inputPekerjaan")
         kawin = request.POST.get("inputKawin")
         pendidikanterakhir = request.POST.get("inputPendidikanterakhir")
+        persyaratan = request.POST.get("inputPersyaratan")
         # Mengecek apakah ada file baru yang di-upload
         myfile = request.FILES.get("gambar")
         
@@ -640,6 +657,7 @@ def edit_skck(request,id):
         suket_id.pekerjaan= pekerjaan
         suket_id.kawin= kawin
         suket_id.pendidikanterakhir= pendidikanterakhir
+        suket_id.persyaratan = persyaratan
         suket_id.status='review'
        
         
@@ -695,6 +713,7 @@ def print_skck(request, id):
         'nik': surat.nik,
         'alamat': surat.alamat,
         'pendidikanterakhir': surat.pendidikanterakhir,
+        'persyaratan': surat.persyaratan,
         'date': surat.date,
     }
     
@@ -723,6 +742,24 @@ def suketktpbedanama(request):
     
     if request.method == "POST":
         # Membuat SuketKTPBedaNama baru
+        
+        fs = FileSystemStorage()
+
+        # Menyimpan file-file yang di-upload
+        berkas1_file = request.FILES.get("inputBerkas1")
+        if berkas1_file:
+            berkas1_filename = fs.save(berkas1_file.name, berkas1_file)
+            berkas1_url = fs.url(berkas1_filename)
+        else:
+            berkas1_url = None
+        
+        berkas2_file = request.FILES.get("inputBerkas2")
+        if berkas2_file:
+            berkas2_filename = fs.save(berkas2_file.name, berkas2_file)
+            berkas2_url = fs.url(berkas2_filename)
+        else:
+            berkas2_url = None
+        
         SuketKTPBedaNama.objects.create(
             penulis=request.user,
             nama=request.POST.get("inputNama"),
@@ -730,7 +767,14 @@ def suketktpbedanama(request):
             ttl=request.POST.get("inputTtl"),
             agama=request.POST.get("inputAgama"),
             alamat=request.POST.get("inputAlamat"),
-            pekerjaan=request.POST.get("inputPekerjaan")
+            pekerjaan=request.POST.get("inputPekerjaan"),
+            namadokumen1=request.POST.get("inputNamaDokumen1"),
+            dokumen1=request.POST.get("inputDokumen1"),
+            namadokumen2=request.POST.get("inputNamaDokumen2"),
+            dokumen2=request.POST.get("inputDokumen2"),
+            berkas1=berkas1_url,
+            berkas2=berkas2_url,
+            
         )
     
         return redirect('suketktpbedanama')
@@ -749,6 +793,20 @@ def edit_suketktpbedanama(request, id):
     suket_id = SuketKTPBedaNama.objects.get(id=id)
     
     if request.method == "POST":
+        
+        
+        fs = FileSystemStorage()
+
+        # Mengecek file baru yang di-upload dan menyimpannya
+        berkas1_file = request.FILES.get("inputBerkas1")
+        if berkas1_file:
+            berkas1_filename = fs.save(berkas1_file.name, berkas1_file)
+            suket_id.berkas1 = fs.url(berkas1_filename)
+        
+        berkas2_file = request.FILES.get("inputBerkas2")
+        if berkas2_file:
+            berkas2_filename = fs.save(berkas2_file.name, berkas2_file)
+            suket_id.berkas2 = fs.url(berkas2_filename)
         # Mengedit data SuketKTPBedaNama
         penulis = request.user
         nama = request.POST.get("inputNama")
@@ -757,7 +815,12 @@ def edit_suketktpbedanama(request, id):
         agama = request.POST.get("inputAgama")
         alamat = request.POST.get("inputAlamat")
         pekerjaan = request.POST.get("inputPekerjaan")
+        namadokumen1=request.POST.get("inputNamaDokumen1")
+        dokumen1=request.POST.get("inputDokumen1")
+        namadokumen2=request.POST.get("inputNamaDokumen2")
+        dokumen2=request.POST.get("inputDokumen2")
         
+    
         suket_id.penulis = penulis
         suket_id.nama = nama
         suket_id.jenis_kelamin = jenis_kelamin
@@ -765,6 +828,10 @@ def edit_suketktpbedanama(request, id):
         suket_id.agama = agama
         suket_id.alamat = alamat
         suket_id.pekerjaan = pekerjaan
+        suket_id.namadokumen1=namadokumen1
+        suket_id.dokumen1=dokumen1
+        suket_id.namadokumen2=namadokumen2
+        suket_id.dokumen2=dokumen2
         suket_id.date = timezone.now() 
         suket_id.status='review'
         
@@ -816,6 +883,10 @@ def print_suketktpbedanama(request, id):
         'pekerjaan': surat.pekerjaan,
         'agama': surat.agama,
         'alamat': surat.alamat,
+        'namadokumen1': surat.namadokumen1,
+        'dokumen1': surat.dokumen1,
+        'namadokumen2': surat.namadokumen2,
+        'dokumen2': surat.dokumen2,
         'date': surat.date,
     }
     
@@ -898,6 +969,13 @@ def suketahliwaris(request):
         # Menyimpan data SuketAhliWaris
         SuketAhliWaris.objects.create(
             penulis=request.user,
+            almarhum=request.POST.get("inputAlmarhum"),
+            suami=request.POST.get("inputSuami"),
+            istri=request.POST.get("inputIstri"),
+            jumlahanak=request.POST.get("inputJumlahanak"),
+            tanggalmeninggal=request.POST.get("inputTanggalmeninggal"),
+            bulanmeninggal=request.POST.get("inputBulanmeninggal"),
+            tahunmeninggal=request.POST.get("inputTahunmeninggal"),
             nama1=request.POST.get("inputNama1"),
             ttl1=request.POST.get("inputTtl1"),
             alamat1=request.POST.get("inputAlamat1"),
@@ -974,6 +1052,13 @@ def edit_suketahliwaris(request, id):
 
         # Mengupdate data lainnya
         suket_id.penulis = request.user
+        suket_id.almarhum=request.POST.get("inputAlmarhum")
+        suket_id.suami=request.POST.get("inputSuami")
+        suket_id.istri=request.POST.get("inputIstri")
+        suket_id.jumlahanak=request.POST.get("inputJumlahanak")
+        suket_id.tanggalmeninggal=request.POST.get("inputTanggalmeninggal")
+        suket_id.bulanmeninggal=request.POST.get("inputBulanmeninggal")
+        suket_id.tahunmeninggal=request.POST.get("inputTahunmeninggal")
         suket_id.nama1 = request.POST.get("inputNama1")
         suket_id.ttl1 = request.POST.get("inputTtl1")
         suket_id.alamat1 = request.POST.get("inputAlamat1")
@@ -1031,6 +1116,13 @@ def print_suketahliwaris(request, id):
 
     # Mengisi template dengan data surat
     context = {
+        'almarhum': surat.almarhum,
+        'suami': surat.suami,
+        'istri': surat.istri,
+        'jumlahanak': surat.jumlahanak,
+        'tanggalmeninggal': surat.tanggalmeninggal,
+        'bulanmeninggal': surat.bulanmeninggal,
+        'tahunmeninggal': surat.tahunmeninggal,
         'nama1': surat.nama1,
         'ttl1': surat.ttl1,
         'alamat1': surat.alamat1,
@@ -1079,7 +1171,10 @@ def suketMTQ(request):
             suku=request.POST.get("inputSuku"),
             agama=request.POST.get("inputAgama"),
             alamat=request.POST.get("inputAlamat"),
-            pekerjaan=request.POST.get("inputPekerjaan")
+            pekerjaan=request.POST.get("inputPekerjaan"),
+            dusun=request.POST.get("inputDusun"),
+            tahunmenetap=request.POST.get("inputTahunMenetap"),
+            keperluan=request.POST.get("inputKeperluan"),
         )
     
         return redirect('suketMTQ')
@@ -1107,6 +1202,9 @@ def edit_suketMTQ(request, id):
         agama = request.POST.get("inputAgama")
         alamat = request.POST.get("inputAlamat")
         pekerjaan = request.POST.get("inputPekerjaan")
+        dusun=request.POST.get("inputDusun")
+        tahunmenetap=request.POST.get("inputTahunMenetap")
+        keperluan=request.POST.get("inputKeperluan")
         
         suket_id.penulis = penulis
         suket_id.nama = nama
@@ -1116,6 +1214,9 @@ def edit_suketMTQ(request, id):
         suket_id.agama = agama
         suket_id.alamat = alamat
         suket_id.pekerjaan = pekerjaan
+        suket_id.dusun = dusun
+        suket_id.tahunmenetap = tahunmenetap
+        suket_id.keperluan = keperluan
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
         suket_id.status='review'
         
@@ -1169,6 +1270,9 @@ def print_suketMTQ(request, id):
         'agama': surat.agama,
         'pekerjaan': surat.pekerjaan,
         'alamat': surat.alamat,
+        'dusun': surat.dusun,
+        'tahunmenetap': surat.tahunmenetap,
+        'keperluan': surat.keperluan,
         'date': surat.date,
     }
     
@@ -1208,7 +1312,8 @@ def suketkehilangan(request):
             barang2=request.POST.get("inputBarang2"),
             barang3=request.POST.get("inputBarang3"),
             tempat1=request.POST.get("inputTempat1"),
-            tempat2=request.POST.get("inputTempat2")
+            tempat2=request.POST.get("inputTempat2"),
+            harikehilangan=request.POST.get("inputHariKehilangan"),
         )
     
         return redirect('suketkehilangan')
@@ -1239,6 +1344,7 @@ def edit_suketkehilangan(request, id):
         barang3 = request.POST.get("inputBarang3")
         tempat1 = request.POST.get("inputTempat1")
         tempat2 = request.POST.get("inputTempat2")
+        harikehilangan=request.POST.get("inputHariKehilangan")
         
         suket_id.penulis = penulis
         suket_id.nama = nama
@@ -1251,6 +1357,7 @@ def edit_suketkehilangan(request, id):
         suket_id.barang3 = barang3
         suket_id.tempat1 = tempat1
         suket_id.tempat2 = tempat2
+        suket_id.harikehilangan = harikehilangan
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
         suket_id.status='review'
         
@@ -1306,6 +1413,7 @@ def print_suketkehilangan(request, id):
         'barang3': surat.barang3,
         'tempat1': surat.tempat1,
         'tempat2': surat.tempat2,
+        'harikehilangan': surat.harikehilangan,
         'date': surat.date,
     }
     
@@ -1401,6 +1509,7 @@ def suketkelahiran(request):
             umuri=request.POST.get("inputUmurI"),
             pekerjaani=request.POST.get("inputPekerjaanI"),
             alamati=request.POST.get("inputAlamatI"),
+            persyaratan=request.POST.get("inputPersyaratan"),
             kkb=kkb_url,
             scanfcbnb=scanfcbnb_url,
             scanfcktportub=scanfcktportub_url,
@@ -1498,6 +1607,7 @@ def edit_suketkelahiran(request, id):
         suket_id.umuri = request.POST.get("inputUmurI")
         suket_id.pekerjaani = request.POST.get("inputPekerjaanI")
         suket_id.alamati = request.POST.get("inputAlamatI")
+        suket_id.persyaratan=request.POST.get("inputPersyaratan")
         suket_id.date = timezone.now()  # Mengupdate tanggal saat edit
         suket_id.status='review'
         
@@ -1557,6 +1667,7 @@ def print_suketkelahiran(request, id):
         'umuri': surat.umuri,
         'pekerjaani': surat.pekerjaani,
         'alamati': surat.alamati,
+        'persyaratan': surat.persyaratan,
         'date': surat.date,
     }
     
@@ -1828,6 +1939,7 @@ def suketpenghasilantidaktetap(request):
             umur=request.POST.get("inputUmur"),
             pekerjaan=request.POST.get("inputPekerjaan"),
             alamat=request.POST.get("inputAlamat"),
+            penghasilan=request.POST.get("inputPenghasilan"),
             pengantarrt=url_pengantar,
             scankk=url_scankk,
         )
@@ -1854,6 +1966,7 @@ def edit_suketpenghasilantidaktetap(request, id):
         umur = request.POST.get("inputUmur")
         pekerjaan = request.POST.get("inputPekerjaan")
         alamat = request.POST.get("inputAlamat")
+        penghasilan=request.POST.get("inputPenghasilan")
 
         # Mengecek apakah ada file baru yang di-upload
         myfile_pengantar = request.FILES.get("pengantarrt")
@@ -1876,6 +1989,7 @@ def edit_suketpenghasilantidaktetap(request, id):
         suket_id.umur = umur
         suket_id.pekerjaan = pekerjaan
         suket_id.alamat = alamat
+        suket_id.penghasilan = penghasilan
         suket_id.date = timezone.now()
         suket_id.status='review'
 
@@ -1923,6 +2037,7 @@ def print_suketpenghasilantidaktetap(request, id):
     'umur': surat.umur,
     'pekerjaan': surat.pekerjaan,
     'alamat': surat.alamat,
+    'penghasilan': surat.penghasilan,
     'date': surat.date,
 }
     
@@ -2154,7 +2269,8 @@ def suketvaksinnikah(request):
             ttl=request.POST.get("inputTtl"),
             agama=request.POST.get("inputAgama"),
             pekerjaan=request.POST.get("inputPekerjaan"),
-            alamat=request.POST.get("inputAlamat")
+            alamat=request.POST.get("inputAlamat"),
+            pengantar=request.POST.get("inputPengantar"),
         )
     
         return redirect('suketvaksinnikah')
@@ -2181,6 +2297,7 @@ def edit_suketvaksinnikah(request, id):
         agama = request.POST.get("inputAgama")
         pekerjaan = request.POST.get("inputPekerjaan")
         alamat = request.POST.get("inputAlamat")
+        pengantar=request.POST.get("inputPengantar")
         
         # Update data di objek suket_id
         suket_id.penulis = penulis
@@ -2190,6 +2307,7 @@ def edit_suketvaksinnikah(request, id):
         suket_id.agama = agama
         suket_id.pekerjaan = pekerjaan
         suket_id.alamat = alamat
+        suket_id.pengantar = pengantar
         suket_id.date = timezone.now()
         suket_id.status='review'
 
@@ -2240,6 +2358,7 @@ def print_suketvaksinnikah(request, id):
     'agama': surat.agama,
     'pekerjaan': surat.pekerjaan,
     'alamat': surat.alamat,
+    'pengantar': surat.pengantar,
     'date': surat.date,
 }
     

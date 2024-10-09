@@ -20,8 +20,13 @@
           <!-- Bordered Tabs -->
 
           <div class="tab-content pt-2">
-            <div class="tab-pane fade show active profile-overview" id="profile-overview">
-              <h5 class="card-title">Detail Data Surat Keterangan Tidak Mampu</h5>
+            <div
+              class="tab-pane fade show active profile-overview"
+              id="profile-overview"
+            >
+              <h5 class="card-title">
+                Detail Data Surat Keterangan Tidak Mampu
+              </h5>
 
               <div class="row">
                 <div class="col-lg-1 col-md-3 label">Nama</div>
@@ -63,20 +68,27 @@
                 <div class="col-lg-10 col-md-9">{{ suket.pekerjaan }}</div>
               </div>
               <div class="row">
+                <div class="col-lg-1 col-md-3 label">Dusun</div>
+                <div class="col-lg-10 col-md-9">{{ suket.dusun }}</div>
+              </div>
+              <div class="row">
+                <div class="col-lg-1 col-md-3 label">Keperluan</div>
+                <div class="col-lg-10 col-md-9">{{ suket.keperluan }}</div>
+              </div>
+              <div class="row">
                 <div class="col-lg-1 col-md-3 label">Pengantar RT</div>
                 <div class="col-lg-10 col-md-9">
                   <a href="{{ suket.pengantarrt }}">
-                    {{ suket.pengantarrt|filename }}</a>
+                    {{ suket.pengantarrt|filename }}</a
+                  >
                 </div>
               </div>
               <div class="row">
                 <div class="col-lg-1 col-md-3 label">Scan KK</div>
                 <div class="col-lg-10 col-md-9">
-                  <a href="{{ suket.scankk }}">
-                    {{ suket.scankk|filename }}</a>
+                  <a href="{{ suket.scankk }}"> {{ suket.scankk|filename }}</a>
                 </div>
               </div>
-
             </div>
           </div>
           <!-- End Bordered Tabs -->

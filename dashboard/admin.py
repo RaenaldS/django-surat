@@ -8,38 +8,38 @@ class AdSuketPermohonanKTP(admin.ModelAdmin):
     
 admin.site.register(SuketPermohonanKTP, AdSuketPermohonanKTP)
 class AdSuketBelumMenikah(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat","persyaratan", "date", "status"]
 
 admin.site.register(SuketBelumMenikah, AdSuketBelumMenikah)
 
 class AdSuketTidakMampu(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan","scankk", "pengantarrt", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan","dusun", "keperluan","scankk", "pengantarrt", "date", "status"]
 
 admin.site.register(SuketTidakMampu, AdSuketTidakMampu)
 
 class AdSKCK(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan", "kawin", "pendidikanterakhir", "date", "status", "scanktp"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "nik", "alamat", "pekerjaan", "kawin", "pendidikanterakhir","persyaratan", "date", "status", "scanktp"]
 
 admin.site.register(SKCK, AdSKCK)
 
 class AdSuketKTPBedaNama(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "agama", "alamat", "pekerjaan", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "agama", "alamat", "pekerjaan","namadokumen1", "dokumen1","namadokumen2", "dokumen2","berkas1","berkas2", "date", "status"]
 
 admin.site.register(SuketKTPBedaNama, AdSuketKTPBedaNama)
 
 class AdSuketAhliWaris(admin.ModelAdmin):
-    list_display = ["penulis", "nama1", "ttl1", "alamat1", "nama2", "ttl2", "alamat2", "nama3", "ttl3", "alamat3","nama4", "ttl4", "alamat4",'skkematian','scanktpkkahliwaris1','scanktpkkahliwaris2','scanktpkkahliwaris3','scanktpkkahliwaris4','scanktpsaksi1','scanktpsaksi2', "date", "status"]
+    list_display = ["penulis", "almarhum","suami", "istri","jumlahanak","tanggalmeninggal","bulanmeninggal","tahunmeninggal","nama1", "ttl1", "alamat1", "nama2", "ttl2", "alamat2", "nama3", "ttl3", "alamat3","nama4", "ttl4", "alamat4",'skkematian','scanktpkkahliwaris1','scanktpkkahliwaris2','scanktpkkahliwaris3','scanktpkkahliwaris4','scanktpsaksi1','scanktpsaksi2', "date", "status"]
 
 
 admin.site.register(SuketAhliWaris, AdSuketAhliWaris)
 
 class AdSuketMTQ(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "alamat", "pekerjaan", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "ttl", "suku", "agama", "alamat", "pekerjaan","dusun","tahunmenetap","keperluan", "date", "status"]
 
 admin.site.register(SuketMTQ, AdSuketMTQ)
 
 class AdSuketKehilangan(admin.ModelAdmin):
-    list_display = ["penulis", "nama", "jenis_kelamin", "umur", "alamat", "pekerjaan", "barang1", "barang2", "barang3", "tempat1", "tempat2", "date", "status"]
+    list_display = ["penulis", "nama", "jenis_kelamin", "umur", "alamat", "pekerjaan","harikehilangan", "barang1", "barang2", "barang3", "tempat1", "tempat2", "date", "status"]
 
 admin.site.register(SuketKehilangan, AdSuketKehilangan)
 
@@ -61,6 +61,7 @@ class AdSuketKelahiran(admin.ModelAdmin):
         "umuri", 
         "pekerjaani", 
         "alamati", 
+        "persyaratan", 
         "date", 
         "status", 
         "kkb", 
@@ -116,6 +117,7 @@ class AdSuketPenghasilanTidakTetap(admin.ModelAdmin):
         'umur',
         'pekerjaan',
         'alamat',
+        'penghasilan',
         'date',
         'status',
         'pengantarrt',
@@ -157,6 +159,7 @@ class AdSuketVaksinNikah(admin.ModelAdmin):
             'agama',
             'pekerjaan',
             'alamat',
+            'pengantar',
             'date',
             'status',
         ]

@@ -6,7 +6,9 @@
     <h1>SKCK</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard' %}">Home</a>
+        </li>
         <li class="breadcrumb-item active">SKCK</li>
       </ol>
     </nav>
@@ -62,6 +64,7 @@
               class="form-control"
               name="inputTtl"
               value="{{ value.ttl }}"
+              placeholder="contoh: Samarinda, 01 Januari 2020"
               required
             />
           </div>
@@ -158,6 +161,20 @@
               class="form-control"
               name="inputPendidikanterakhir"
               value="{{ value.pendidikanterakhir }}"
+              required
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="inputPersyaratan" class="col-sm-2 col-form-label"
+            >Persyaratan</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputPersyaratan"
+              value="{{ value.persyaratan }}"
               required
             />
           </div>
@@ -488,6 +505,7 @@
                       type="text"
                       class="form-control"
                       name="inputTtl"
+                      placeholder="contoh: Samarinda, 01 Januari 2020"
                       required
                     />
                   </div>
@@ -580,6 +598,19 @@
                       type="text"
                       class="form-control"
                       name="inputPendidikanterakhir"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="inputPersyaratan" class="col-sm-2 col-form-label"
+                    >Persyaratan</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputPersyaratan"
                       required
                     />
                   </div>

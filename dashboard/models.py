@@ -42,6 +42,7 @@ class SuketBelumMenikah(models.Model):
     agama = models.CharField(max_length=255)
     nik = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
+    persyaratan = models.CharField(max_length=255, blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     
@@ -65,6 +66,8 @@ class SuketTidakMampu(models.Model):
     nik = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
+    dusun = models.CharField(max_length=255, blank=True, null=True)
+    keperluan = models.CharField(max_length=255, blank=True, null=True)
     scankk = models.URLField(blank=True, null=True)
     pengantarrt = models.URLField(blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
@@ -92,6 +95,7 @@ class SKCK(models.Model):
     pekerjaan = models.CharField(max_length=255)
     kawin = models.CharField(max_length=255)
     pendidikanterakhir = models.CharField(max_length=255)
+    persyaratan = models.CharField(max_length=255, blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     scanktp = models.URLField(blank=True, null=True)
@@ -114,11 +118,17 @@ class SuketKTPBedaNama(models.Model):
     agama = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
+    namadokumen1=models.CharField(max_length=255, blank=True, null=True)
+    dokumen1=models.CharField(max_length=255, blank=True, null=True)
+    namadokumen2=models.CharField(max_length=255, blank=True, null=True)
+    dokumen2=models.CharField(max_length=255, blank=True, null=True)
+    berkas1 = models.URLField(blank=True, null=True)
+    berkas2 = models.URLField(blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     
     def __str__(self):
-        return "{} - {}".format(self.penulis, self.nik)
+        return "{}".format(self.penulis)
     
 class SuketAhliWaris(models.Model):
     STATUS_CHOICES = [
@@ -129,6 +139,13 @@ class SuketAhliWaris(models.Model):
 
 
     penulis = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    almarhum =models.CharField(max_length=255, blank=True, null=True)
+    suami =models.CharField(max_length=255, blank=True, null=True)
+    istri =models.CharField(max_length=255, blank=True, null=True)
+    jumlahanak =models.CharField(max_length=255, blank=True, null=True)
+    tanggalmeninggal =models.CharField(max_length=255, blank=True, null=True)
+    bulanmeninggal =models.CharField(max_length=255, blank=True, null=True)
+    tahunmeninggal =models.CharField(max_length=255, blank=True, null=True)
     nama1 = models.CharField(max_length=255)
     ttl1 = models.CharField(max_length=255)
     alamat1 = models.CharField(max_length=255)
@@ -170,6 +187,9 @@ class SuketMTQ(models.Model):
     agama = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
+    dusun = models.CharField(max_length=255,blank=True, null=True)
+    tahunmenetap = models.CharField(max_length=255,blank=True, null=True)
+    keperluan = models.CharField(max_length=255,blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     
@@ -190,6 +210,7 @@ class SuketKehilangan(models.Model):
     umur = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
+    harikehilangan = models.CharField(max_length=255,blank=True, null=True)
     barang1 = models.CharField(max_length=255)
     barang2 = models.CharField(max_length=255)
     barang3 = models.CharField(max_length=255)
@@ -225,6 +246,7 @@ class SuketKelahiran(models.Model):
     umuri = models.CharField(max_length=255)
     pekerjaani = models.CharField(max_length=255)
     alamati = models.CharField(max_length=255)
+    persyaratan = models.CharField(max_length=255,blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     kkb = models.URLField(blank=True, null=True)
@@ -291,6 +313,7 @@ class SuketPenghasilanTidakTetap(models.Model):
     umur = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
+    penghasilan = models.CharField(max_length=255,blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     pengantarrt = models.URLField(blank=True, null=True)
@@ -344,6 +367,7 @@ class SuketVaksinNikah(models.Model):
     agama = models.CharField(max_length=255)
     pekerjaan = models.CharField(max_length=255)
     alamat = models.CharField(max_length=255)
+    pengantar = models.CharField(max_length=255,blank=True, null=True)
     date = models.DateTimeField(default=timezone.now, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='review')
     

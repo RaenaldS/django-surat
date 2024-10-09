@@ -6,7 +6,9 @@
     <h1>Surat Keterangan Kelahiran</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard' %}">Home</a>
+        </li>
         <li class="breadcrumb-item active">Surat Keterangan Kelahiran</li>
       </ol>
     </nav>
@@ -397,7 +399,21 @@
             </div>
           </div>
         </div>
-        <p class="text-secondary">Orang Tua</p>
+        <p class="text-secondary">Melengkapi</p>
+        <div class="row mb-3">
+          <label for="inputPersyaratan" class="col-sm-2 col-form-label"
+            >Peryaratan Melengkapi</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputPersyaratan"
+              value="{{ value.persyaratan }}"
+              required
+            />
+          </div>
+        </div>
 
         <div class="row mb-3">
           <label class="col-sm-2 col-form-label">Submit Here</label>
@@ -996,6 +1012,21 @@
                       type="file"
                       id="formFile"
                       name="scanfcktpsaksid2"
+                    />
+                  </div>
+                </div>
+
+                <p class="text-secondary">Melengkapi</p>
+                <div class="row mb-3">
+                  <label for="inputPersyaratan" class="col-sm-2 col-form-label"
+                    >Peryaratan Melengkapi</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputPersyaratan"
+                      required
                     />
                   </div>
                 </div>

@@ -6,7 +6,9 @@
     <h1>Surat Keterangan KTP Beda Nama</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard' %}">Home</a>
+        </li>
         <li class="breadcrumb-item active">Surat Keterangan KTP Beda Nama</li>
       </ol>
     </nav>
@@ -18,7 +20,7 @@
 
       <!-- General Form Elements -->
 
-      <form method="post" action="{% url 'edit_suketktpbedanama' value.id %}">
+      <form method="post" action="{% url 'edit_suketktpbedanama' value.id %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row mb-3">
           <label for="inputNama" class="col-sm-2 col-form-label">Nama</label>
@@ -58,6 +60,7 @@
               class="form-control"
               name="inputTtl"
               value="{{ value.ttl }}"
+              placeholder="contoh: Samarinda, 01 Januari 2020"
               required
             />
           </div>
@@ -102,6 +105,103 @@
               value="{{ value.alamat }}"
               required
             />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label for="inputNamaDokumen1" class="col-sm-2 col-form-label"
+            >Nama di dokumen pertama</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputNamaDokumen1"
+              value="{{ value.namadokumen1 }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label for="inputDokumen1" class="col-sm-2 col-form-label"
+            >Jenis dokumen pertama</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputDokumen1"
+              placeholder="contoh: KTP, Akta Lahir"
+              value="{{ value.dokumen1 }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label for="inputNamaDokumen2" class="col-sm-2 col-form-label"
+            >Nama di dokumen kedua</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputNamaDokumen2"
+              value="{{ value.namadokumen2 }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label for="inputDokumen2" class="col-sm-2 col-form-label"
+            >Jenis dokumen kedua</label
+          >
+          <div class="col-sm-10">
+            <input
+              type="text"
+              class="form-control"
+              name="inputDokumen2"
+              placeholder="contoh: SIM, Passport"
+              value="{{ value.dokumen2 }}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label for="inputNumber" class="col-sm-2 col-form-label"
+            >Dokumen 1</label
+          >
+          <div class="col-sm-10">
+            <input
+              class="form-control"
+              type="file"
+              id="formFile"
+              name="inputBerkas1"
+            />
+            <div class="d-flex gap-3">
+              <p>file yang di upload :</p>
+              <a href="{{ value.berkas1 }}">{{ value.berkas1|filename }}</a>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <label for="inputNumber" class="col-sm-2 col-form-label"
+            >Dokumen 2</label
+          >
+          <div class="col-sm-10">
+            <input
+              class="form-control"
+              type="file"
+              id="formFile"
+              name="inputBerkas2"
+            />
+            <div class="d-flex gap-3">
+              <p>file yang di upload :</p>
+              <a href="{{ value.berkas2 }}">{{ value.berkas2|filename }}</a>
+            </div>
           </div>
         </div>
 
@@ -378,7 +478,7 @@
 
               <!-- General Form Elements -->
 
-              <form method="post">
+              <form method="post" enctype="multipart/form-data" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row mb-3">
                   <label for="inputNama" class="col-sm-2 col-form-label"
@@ -412,6 +512,7 @@
                       type="text"
                       class="form-control"
                       name="inputTtl"
+                      placeholder="contoh: Samarinda, 01 Januari 2020"
                       required
                     />
                   </div>
@@ -455,6 +556,92 @@
                       name="inputAlamat"
                       required
                     />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="inputNamaDokumen1" class="col-sm-2 col-form-label"
+                    >Nama di dokumen pertama</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputNamaDokumen1"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputDokumen1" class="col-sm-2 col-form-label"
+                    >Jenis dokumen pertama</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputDokumen1"
+                      placeholder="contoh: KTP, Akta Lahir"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputNamaDokumen2" class="col-sm-2 col-form-label"
+                    >Nama di dokumen kedua</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputNamaDokumen2"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputDokumen2" class="col-sm-2 col-form-label"
+                    >Jenis dokumen kedua</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="inputDokumen2"
+                      placeholder="contoh: SIM, Passport"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="inputNumber" class="col-sm-2 col-form-label"
+                    >Dokumen 1</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      class="form-control"
+                      type="file"
+                      id="formFile"
+                      name="inputBerkas1"
+                    />
+                   
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="inputNumber" class="col-sm-2 col-form-label"
+                    >Dokumen 2</label
+                  >
+                  <div class="col-sm-10">
+                    <input
+                      class="form-control"
+                      type="file"
+                      id="formFile"
+                      name="inputBerkas2"
+                    />
+                    
                   </div>
                 </div>
 
